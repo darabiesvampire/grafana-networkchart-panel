@@ -1,0 +1,30 @@
+{
+  "type": "panel",
+  "name": "Network Chart",
+  "id": "grafana-networkchart-panel",
+
+  "info": {
+    "description": "network chart panel for grafana",
+    "author": {
+      "name": "Ali Bugdayci",
+      "url": "http://detangle.com"
+    },
+    "keywords": ["networkchart", "panel"],
+    "logos": {
+      "small": "src/img/networkchart_logo_small.png",
+      "large": "src/img/networkchart_logo_large.png"
+    },
+    "links": [
+      {"name": "Project site", "url": "https://github.com/grafana/networkchart-panel"}
+    ],
+    "screenshots": [
+    ],
+    "version": "0.1.0",
+    "updated": "2017-10-11"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "4.6",
+    "plugins": [ ]
+  }
+}
