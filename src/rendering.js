@@ -3,7 +3,8 @@ import * as d3 from 'd3';
 //import {event as currentEvent} from './d3-selection';
 
 export default function link(scope, elem, attrs, ctrl) {
-  var data,columns, panel;
+  var data,columns, panel,tooltipEle;
+  tooltipEle = elem.find('.tooltip');
   elem = elem.find('.networkchart-panel');
 
 
@@ -48,7 +49,7 @@ export default function link(scope, elem, attrs, ctrl) {
     var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
-    var tooltip = svg.select(".tooltip")
+    var tooltip = d3.select(tooltipEle[0])
                   .style("opacity", 0);
 
 
@@ -89,6 +90,14 @@ export default function link(scope, elem, attrs, ctrl) {
                 .attr("stroke-width", d => Math.log(d.value) );
 
 
+    var maxValueLogged = _.reduce(linkData, (max, d) =>{
+      var log = Math.log(d.value);
+      if(log > max)
+        return log;
+
+      return max;
+    },0);
+
     //************************ NODES *************************/
 
 
@@ -116,6 +125,23 @@ export default function link(scope, elem, attrs, ctrl) {
     // Create new elements as needed.  
     var nodeEnter = nodeUpdate.enter().append("circle")
                     .attr("fill", d => color(d.group))
+                    .on("mouseover", function(d) {    
+                      tooltip.transition()    
+                          .duration(200)    
+                          .style("opacity", .9);    
+
+                      tooltip.html(d.id)  
+                          .style("width",  (d.id.length * 7) + "px")
+                          .style("left",  (d3.event.pageX) + "px")   
+                          .style("top",   (d3.event.pageY - 28) + "px")
+                      })
+
+                    .on("mouseout", function(d) {   
+                        tooltip.transition()    
+                            .duration(500)    
+                            .style("opacity", 0); 
+                    })
+
                     .call(d3.drag()
                       .on("start", dragstarted)
                       .on("drag", dragged)
@@ -134,7 +160,20 @@ export default function link(scope, elem, attrs, ctrl) {
       
 
     var simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id(d => d.id) )
+      .force("link", d3.forceLink()
+        .id(d => d.id) 
+        .strength(d => { 
+
+        if(!d.value)
+          return 0.01;
+
+        var strength = Math.log(d.value)/maxValueLogged;
+        if(strength < 0.01)
+          return 0.01;
+
+        return strength;
+        })
+      )
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2));
 

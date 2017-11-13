@@ -6,7 +6,8 @@ System.register(['lodash', 'd3'], function (_export, _context) {
   var _, d3;
 
   function link(scope, elem, attrs, ctrl) {
-    var data, columns, panel;
+    var data, columns, panel, tooltipEle;
+    tooltipEle = elem.find('.tooltip');
     elem = elem.find('.networkchart-panel');
 
     ctrl.events.on('render', function () {
@@ -45,7 +46,7 @@ System.register(['lodash', 'd3'], function (_export, _context) {
 
       var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-      var tooltip = svg.select(".tooltip").style("opacity", 0);
+      var tooltip = d3.select(tooltipEle[0]).style("opacity", 0);
 
       //************************ Links between nodes *************************/
 
@@ -84,6 +85,13 @@ System.register(['lodash', 'd3'], function (_export, _context) {
         return Math.log(d.value);
       });
 
+      var maxValueLogged = _.reduce(linkData, function (max, d) {
+        var log = Math.log(d.value);
+        if (log > max) return log;
+
+        return max;
+      }, 0);
+
       //************************ NODES *************************/
 
 
@@ -112,6 +120,12 @@ System.register(['lodash', 'd3'], function (_export, _context) {
       // Create new elements as needed.  
       var nodeEnter = nodeUpdate.enter().append("circle").attr("fill", function (d) {
         return color(d.group);
+      }).on("mouseover", function (d) {
+        tooltip.transition().duration(200).style("opacity", .9);
+
+        tooltip.html(d.id).style("width", d.id.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+      }).on("mouseout", function (d) {
+        tooltip.transition().duration(500).style("opacity", 0);
       }).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
 
       /*                    
@@ -128,6 +142,14 @@ System.register(['lodash', 'd3'], function (_export, _context) {
 
       var simulation = d3.forceSimulation().force("link", d3.forceLink().id(function (d) {
         return d.id;
+      }).strength(function (d) {
+
+        if (!d.value) return 0.01;
+
+        var strength = Math.log(d.value) / maxValueLogged;
+        if (strength < 0.01) return 0.01;
+
+        return strength;
       })).force("charge", d3.forceManyBody()).force("center", d3.forceCenter(width / 2, height / 2));
 
       simulation.nodes(nodesData).on("tick", ticked);
