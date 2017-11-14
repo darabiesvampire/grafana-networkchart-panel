@@ -33,9 +33,24 @@ System.register(['lodash'], function (_export, _context) {
       }
     }
 
-    function noDataPoints(display) {
+    function showError(errorText) {
       var noData = elem.find(".no-data");
-      if (display) noData.show();else noData.hide();
+      if (errorText) {
+        noData.text(errorText);
+        noData.show();
+      } else noData.hide();
+    }
+
+    function addZoom(svg) {
+      var svgWrapper = svg.select('.svg-wrapper');
+
+      svg.call(d3.zoom().on('zoom', function () {
+
+        var scale = d3.event.transform.k,
+            translate = [d3.event.transform.x, d3.event.transform.y];
+
+        svgWrapper.attr('transform', 'translate(' + translate[0] + ', ' + translate[1] + ') scale(' + scale + ')');
+      }));
     }
 
     function addNetworkChart() {
@@ -43,6 +58,8 @@ System.register(['lodash'], function (_export, _context) {
       var height = elem.height();
 
       var svg = d3.select(elem[0]);
+
+      addZoom(svg);
 
       var color = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -197,11 +214,15 @@ System.register(['lodash'], function (_export, _context) {
       columns = ctrl.columns;
       panel = ctrl.panel;
 
-      if (setElementHeight()) {
-        if (ctrl.data && ctrl.data.length) {
-          addNetworkChart();
-          noDataPoints(false);
-        } else noDataPoints(true);
+      if (setElementHeight()) if (ctrl._error || !data || !data.length) {
+
+        showError(ctrl._error || "No data points");
+
+        data = [];
+        addNetworkChart();
+      } else {
+        addNetworkChart();
+        showError(false);
       }
 
       ctrl.renderingCompleted();

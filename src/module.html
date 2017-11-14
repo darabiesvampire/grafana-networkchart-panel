@@ -3,6 +3,14 @@
 		stroke:white;
 	}
 
+	.networkchart-panel{
+		cursor: move;
+	}
+
+	.nodes circle{
+		cursor: pointer;
+	}
+
 	.no-data{
 		display: none;
 	}
@@ -30,11 +38,13 @@
 	<svg class="networkchart-panel" style="width: 100%;height: 100%">
 		<text class="no-data" x="15" y="15" fill="red">No data points</text>
 
-		<g class="links">
-		</g>
+		<g class="svg-wrapper">
+			<g class="links">
+			</g>
 
-		<g class="nodes">
-		</g>
+			<g class="nodes">
+			</g>
+		</g>	
 	</svg>
 
 </div>

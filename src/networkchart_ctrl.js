@@ -64,11 +64,20 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
 
   onDataReceived(dataList) {
     let data = dataList[0];
+
+    if(!data)
+    {
+      this._error = "No data points.";
+      return this.render();
+    }
+
     if(data.type !== "table")
     {
-      //TODO: show a better explanation 
-      return console.error("Should be table fetch. Use terms only." );
+      this._error = "Should be table fetch. Use terms only.";
+      return this.render();
     }
+
+    this._error = null;
 
     this.columnMap = data.columnMap; 
     this.columns = data.columns; 

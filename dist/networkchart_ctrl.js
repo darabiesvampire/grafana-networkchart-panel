@@ -125,10 +125,18 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
           key: 'onDataReceived',
           value: function onDataReceived(dataList) {
             var data = dataList[0];
-            if (data.type !== "table") {
-              //TODO: show a better explanation 
-              return console.error("Should be table fetch. Use terms only.");
+
+            if (!data) {
+              this._error = "No data points.";
+              return this.render();
             }
+
+            if (data.type !== "table") {
+              this._error = "Should be table fetch. Use terms only.";
+              return this.render();
+            }
+
+            this._error = null;
 
             this.columnMap = data.columnMap;
             this.columns = data.columns;
