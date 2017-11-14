@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['lodash', 'd3'], function (_export, _context) {
+System.register(['lodash'], function (_export, _context) {
   "use strict";
 
-  var _, d3;
+  var _;
 
   function link(scope, elem, attrs, ctrl) {
     var data, columns, panel, tooltipEle;
@@ -213,8 +213,6 @@ System.register(['lodash', 'd3'], function (_export, _context) {
   return {
     setters: [function (_lodash) {
       _ = _lodash.default;
-    }, function (_d) {
-      d3 = _d;
     }],
     execute: function () {}
   };

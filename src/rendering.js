@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import * as d3 from 'd3';
+//import * as d3 from 'd3';
 //import {event as currentEvent} from './d3-selection';
 
 export default function link(scope, elem, attrs, ctrl) {
