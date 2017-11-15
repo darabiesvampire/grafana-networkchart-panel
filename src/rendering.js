@@ -65,18 +65,45 @@ export default function link(scope, elem, attrs, ctrl) {
     var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
+    //************************ Tooltips *************************/
     var tooltip = d3.select(tooltipEle[0])
                   .style("opacity", 0);
+
+    var containerPositionFromTop =  elem.position().top;
+
+    function showTooltip(d) {    
+      tooltip.transition()
+          .duration(200)
+          .style("opacity", .9);
+
+      tooltip.html(d.tooltip)  
+          .style("width",  (d.id.length * 7) + "px")
+          .style("left",  (d3.event.pageX) + "px")   
+          .style("top",   (d3.event.pageY - containerPositionFromTop - 30) + "px")
+      }
+
+
+      function hideTooltip(d) {   
+          tooltip.transition()    
+              .duration(500)    
+              .style("opacity", 0); 
+      }
 
 
     //************************ Links between nodes *************************/
 
     var linkData = _.reduce(data, (all,d) => {
+
+      //No value
+      if(!d[2])
+        return all;
+
           all.push({
-              id: d[0]+ ' <-> ' + d[1], 
+              id: d[0] + d[1], 
               source: d[0],
               target: d[1],
-              value:  d[2]
+              value:  d[2],
+              tooltip: d[0]+ ' <=> ' + d[1] + '<br>' + d[2]
             });
         return all;
       }
@@ -92,7 +119,9 @@ export default function link(scope, elem, attrs, ctrl) {
 
     // ENTER
     // Create new elements as needed.  
-    var enter = linkUpdate.enter().append("line");
+    var enter = linkUpdate.enter().append("line")
+                .on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip)
 
     /*
     enter    
@@ -118,9 +147,15 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     var nodesData = _.reduce(data, (all,d) => {
+      if(!d[2])
+        return all;
 
         for(var i=0; i < d.length-1 ; i++)
-          all.push({id: d[i], group: i}); //columns[i].text
+          all.push({
+            id: d[i], 
+            group: i,
+            tooltip: d[i]
+          }); //columns[i].text
 
         return all;
       }
@@ -137,31 +172,12 @@ export default function link(scope, elem, attrs, ctrl) {
     // Remove old elements as needed.
     nodeUpdate.exit().remove();
 
-
-    var containerPositionFromTop =  elem.position().top;
-    console.log(containerPositionFromTop);
-
     // ENTER
     // Create new elements as needed.  
     var nodeEnter = nodeUpdate.enter().append("circle")
                     .attr("fill", d => color(d.group))
-                    .on("mouseover", function(d) {    
-                      tooltip.transition()
-                          .duration(200)
-                          .style("opacity", .9);
-
-                      tooltip.html(d.id)  
-                          .style("width",  (d.id.length * 7) + "px")
-                          .style("left",  (d3.event.pageX) + "px")   
-                          .style("top",   (d3.event.pageY - containerPositionFromTop - 30) + "px")
-                      })
-
-                    .on("mouseout", function(d) {   
-                        tooltip.transition()    
-                            .duration(500)    
-                            .style("opacity", 0); 
-                    })
-
+                    .on("mouseover", showTooltip)
+                    .on("mouseout", hideTooltip)
                     .call(d3.drag()
                       .on("start", dragstarted)
                       .on("drag", dragged)
