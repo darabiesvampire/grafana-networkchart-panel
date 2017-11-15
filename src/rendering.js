@@ -137,19 +137,23 @@ export default function link(scope, elem, attrs, ctrl) {
     // Remove old elements as needed.
     nodeUpdate.exit().remove();
 
+
+    var containerPositionFromTop =  elem.position().top;
+    console.log(containerPositionFromTop);
+
     // ENTER
     // Create new elements as needed.  
     var nodeEnter = nodeUpdate.enter().append("circle")
                     .attr("fill", d => color(d.group))
                     .on("mouseover", function(d) {    
-                      tooltip.transition()    
-                          .duration(200)    
-                          .style("opacity", .9);    
+                      tooltip.transition()
+                          .duration(200)
+                          .style("opacity", .9);
 
                       tooltip.html(d.id)  
                           .style("width",  (d.id.length * 7) + "px")
                           .style("left",  (d3.event.pageX) + "px")   
-                          .style("top",   (d3.event.pageY - 28) + "px")
+                          .style("top",   (d3.event.pageY - containerPositionFromTop - 30) + "px")
                       })
 
                     .on("mouseout", function(d) {   

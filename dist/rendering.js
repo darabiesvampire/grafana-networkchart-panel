@@ -133,6 +133,9 @@ System.register(['lodash'], function (_export, _context) {
       // Remove old elements as needed.
       nodeUpdate.exit().remove();
 
+      var containerPositionFromTop = elem.position().top;
+      console.log(containerPositionFromTop);
+
       // ENTER
       // Create new elements as needed.  
       var nodeEnter = nodeUpdate.enter().append("circle").attr("fill", function (d) {
@@ -140,7 +143,7 @@ System.register(['lodash'], function (_export, _context) {
       }).on("mouseover", function (d) {
         tooltip.transition().duration(200).style("opacity", .9);
 
-        tooltip.html(d.id).style("width", d.id.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+        tooltip.html(d.id).style("width", d.id.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - containerPositionFromTop - 30 + "px");
       }).on("mouseout", function (d) {
         tooltip.transition().duration(500).style("opacity", 0);
       }).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
