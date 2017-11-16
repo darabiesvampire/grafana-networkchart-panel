@@ -6,8 +6,10 @@ System.register(['lodash'], function (_export, _context) {
   var _;
 
   function link(scope, elem, attrs, ctrl) {
-    var data, columns, panel, tooltipEle;
-    tooltipEle = elem.find('.tooltip');
+    var data, columns, panel;
+    var tooltipEle = elem.find('.tooltip');
+    var captionEle = elem.find('.caption');
+
     elem = elem.find('.networkchart-panel');
 
     ctrl.events.on('render', function () {
@@ -57,26 +59,66 @@ System.register(['lodash'], function (_export, _context) {
       var width = elem.width();
       var height = elem.height();
 
-      var svg = d3.select(elem[0]);
-
-      addZoom(svg);
-
       var color = d3.scaleOrdinal(d3.schemeCategory10);
 
+      //************************ Add Caption Colors *************************/
+
+      var columns = _.filter(ctrl.columns, function (e) {
+        return e.filterable;
+      });
+
+      var captions = d3.select(captionEle[0]);
+
+      var captionsUpdate = captions.selectAll("g").data(columns, function (d) {
+        return d.text;
+      });
+
+      // EXIT
+      // Remove old elements as needed.
+      captionsUpdate.exit().remove();
+
+      // ENTER
+      // Create new elements as needed.  
+      var captionsEnter = captionsUpdate.enter().append("g");
+
+      function y(d, i) {
+        return 25 * (i + 1);
+      }
+
+      function y_plus_5(d, i) {
+        return y(d, i) + 5;
+      }
+
+      captionsEnter.append("circle").attr("r", 10).attr("fill", function (d, i) {
+        return color(i);
+      }).attr("cx", 15).attr("cy", y);
+
+      captionsEnter.append("text").attr("fill", "white").attr("x", 25).attr("y", y_plus_5);
+
+      // ENTER + UPDATE
+      captionsUpdate.merge(captionsEnter).selectAll('text').text(function (d) {
+        return d.text;
+      });
+
       //************************ Tooltips *************************/
+
       var tooltip = d3.select(tooltipEle[0]).style("opacity", 0);
 
-      var containerPositionFromTop = elem.position().top;
-
       function showTooltip(d) {
-        tooltip.transition().duration(200).style("opacity", .9);
+        tooltip.transition().duration(200).style("opacity", .8);
 
-        tooltip.html(d.tooltip).style("width", d.id.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - containerPositionFromTop - 30 + "px");
+        tooltip.html(d.tooltip).style("width", d.id.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
       }
 
       function hideTooltip(d) {
         tooltip.transition().duration(500).style("opacity", 0);
       }
+
+      //************************ Main Graph *************************/
+
+      var svg = d3.select(elem[0]);
+
+      addZoom(svg);
 
       //************************ Links between nodes *************************/
 
