@@ -91,14 +91,16 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             valueName: 'current',
             strokeWidth: 1,
             fontSize: '80%',
+
             combine: {
-              threshold: 0.0,
-              label: 'Others'
+              active: false,
+              method: "min"
             }
           };
 
           _.defaults(_this.panel, panelDefaults);
           _.defaults(_this.panel.legend, panelDefaults.legend);
+          _.defaults(_this.panel.combine, panelDefaults.combine);
 
           //this.events.on('render', this.onRender.bind(this));
           _this.events.on('data-received', _this.onDataReceived.bind(_this));

@@ -55,6 +55,19 @@ System.register(['lodash'], function (_export, _context) {
       }));
     }
 
+    function y(d, i) {
+      return 25 * (i + 1);
+    }
+
+    function y_plus_5(d, i) {
+      return y(d, i) + 5;
+    }
+
+    function getCombineMethodParams(value1, value2) {
+      //TODO check the method and arrange the parameters
+      return [value1, value2];
+    }
+
     function addNetworkChart() {
       var width = elem.width();
       var height = elem.height();
@@ -81,14 +94,6 @@ System.register(['lodash'], function (_export, _context) {
       // Create new elements as needed.  
       var captionsEnter = captionsUpdate.enter().append("g");
 
-      function y(d, i) {
-        return 25 * (i + 1);
-      }
-
-      function y_plus_5(d, i) {
-        return y(d, i) + 5;
-      }
-
       captionsEnter.append("circle").attr("r", 10).attr("fill", function (d, i) {
         return color(i);
       }).attr("cx", 15).attr("cy", y);
@@ -107,7 +112,7 @@ System.register(['lodash'], function (_export, _context) {
       function showTooltip(d) {
         tooltip.transition().duration(200).style("opacity", .8);
 
-        tooltip.html(d.tooltip).style("width", d.id.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+        tooltip.html(d.tooltip).style("width", d.tooltip.length * 7 + "px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
       }
 
       function hideTooltip(d) {
@@ -121,21 +126,92 @@ System.register(['lodash'], function (_export, _context) {
       addZoom(svg);
 
       //************************ Links between nodes *************************/
+      var linkData = [];
+      var nodesData = [];
 
-      var linkData = _.reduce(data, function (all, d) {
+      if (!ctrl.panel.combine.active) {
+        linkData = _.reduce(data, function (all, d) {
 
-        //No value
-        if (!d[2]) return all;
+          //No value
+          if (!d[2]) return all;
 
-        all.push({
-          id: d[0] + d[1],
-          source: d[0],
-          target: d[1],
-          value: d[2],
-          tooltip: d[0] + ' <=> ' + d[1] + '<br>' + d[2]
+          all.push({
+            id: d[0] + d[1],
+            source: d[0],
+            target: d[1],
+            value: d[2],
+            tooltip: d[0] + ' <=> ' + d[1] + '<br>' + d[2]
+          });
+          return all;
+        }, []);
+      } else {
+        var allSources = {};
+        var allTargets = {};
+
+        _.forEach(data, function (d) {
+          //No value
+          if (!d[2]) return;
+
+          var source = d[0];
+          var target = d[1];
+
+          initHash(allSources, source);
+          initHash(allTargets, target);
+
+          allSources[source][target] = d[2];
+          allTargets[target][source] = d[2];
         });
-        return all;
-      }, []);
+
+        var combineMethod = _[ctrl.panel.combine.method];
+
+        var relations = {};
+
+        for (var source in allSources) {
+
+          initHash(relations, source);
+          var currentRel = relations[source];
+
+          for (var target in allSources[source]) {
+
+            var value = allSources[source][target];
+
+            for (var sourceFromTarget in allTargets[target]) {
+
+              //Already calculated at the other end
+              if (relations[sourceFromTarget]) continue;
+
+              if (!currentRel[sourceFromTarget]) currentRel[sourceFromTarget] = 0;
+
+              var param = getCombineMethodParams(value, allTargets[target][sourceFromTarget]);
+              currentRel[sourceFromTarget] += combineMethod(param);
+            }
+          }
+        }
+
+        for (var relation1 in relations) {
+          for (var relation2 in relations[relation1]) {
+            var value = relations[relation1][relation2];
+
+            linkData.push({
+              id: relation1 + relation2,
+              source: relation1,
+              target: relation2,
+              value: value,
+              tooltip: relation1 + ' <=> ' + relation2 + '<br>' + value
+            });
+
+            nodesData.push({
+              id: relation1,
+              tooltip: relation1
+            });
+
+            nodesData.push({
+              id: relation2,
+              tooltip: relation2
+            });
+          }
+        }
+      }
 
       var linkUpdate = svg.select(".links").selectAll("line").data(linkData, function (d) {
         return d.id;
@@ -171,8 +247,7 @@ System.register(['lodash'], function (_export, _context) {
 
       //************************ NODES *************************/
 
-
-      var nodesData = _.reduce(data, function (all, d) {
+      if (!ctrl.panel.combine.active) nodesData = _.reduce(data, function (all, d) {
         if (!d[2]) return all;
 
         for (var i = 0; i < d.length - 1; i++) {
@@ -201,7 +276,7 @@ System.register(['lodash'], function (_export, _context) {
       // ENTER
       // Create new elements as needed.  
       var nodeEnter = nodeUpdate.enter().append("circle").attr("fill", function (d) {
-        return color(d.group);
+        return d.group ? color(d.group) : color(0);
       }).on("mouseover", showTooltip).on("mouseout", hideTooltip).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
 
       /*                    
@@ -265,6 +340,10 @@ System.register(['lodash'], function (_export, _context) {
         if (!d3.event.active) simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
+      }
+
+      function initHash(hash, key) {
+        if (!hash[key]) hash[key] = {};
       }
     }
 

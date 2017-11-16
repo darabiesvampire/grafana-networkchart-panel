@@ -27,14 +27,18 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       valueName: 'current',
       strokeWidth: 1,
       fontSize: '80%',
+
+
   	  combine: {
-  	    threshold: 0.0,
-  	    label: 'Others'
+        active: false,
+  	    method: "min"
   	  }
     };
 
     _.defaults(this.panel, panelDefaults);
     _.defaults(this.panel.legend, panelDefaults.legend);
+    _.defaults(this.panel.combine, panelDefaults.combine);
+
 
     //this.events.on('render', this.onRender.bind(this));
     this.events.on('data-received', this.onDataReceived.bind(this));
