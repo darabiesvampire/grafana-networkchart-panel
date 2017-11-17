@@ -1,72 +1,117 @@
 <div class="editor-row">
+	
 	<div class="section gf-form-group">
-		<h5 class="section-heading">General</h5>
+		<h5 class="section-heading">Nodes</h5>
+
+		<!--
+		<gf-form-switch class="gf-form" label="Dynamic Radius" label-class="width-10" checked="ctrl.panel.dynamic_radius" on-change="ctrl.refresh()"></gf-form-switch>
+
+		-->
+
 		<div class="gf-form">
-			<span class="gf-form-label width-11">Type</span>
-			<div class="gf-form-select-wrapper max-width-10">
-				<select class="gf-form-input" ng-model="ctrl.panel.networkType" ng-options="t for t in ['network', 'donut']" ng-change="ctrl.render()"></select>
-			</div>
-		</div>
-		<div class="gf-form">
-			<span class="gf-form-label width-11">Unit</span>
-			<div class="gf-form-dropdown-typeahead width-10"
-				 ng-model="ctrl.panel.format"
-				 dropdown-typeahead="ctrl.unitFormats"
-				 dropdown-typeahead-on-select="ctrl.setUnitFormat($subItem)">
-			</div>
-		</div>
-		<div class="gf-form">
-			<span class="gf-form-label width-11">Value</span>
-			<div class="gf-form-select-wrapper max-width-10">
-				<select class="gf-form-input" ng-model="ctrl.panel.valueName" ng-options="v for v in ['min','max','avg', 'current', 'total']" ng-change="ctrl.render()"></select>
-			</div>
-		</div>
-		<div class="gf-form">
-			<span class="gf-form-label width-11">Divider width</span>
-			<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.panel.strokeWidth" ng-change="ctrl.render()">
+			<span class="gf-form-label width-10">Node Radius</span>
+			<input type="number" class="gf-form-input max-width-12" ng-model="ctrl.panel.node_radius" ng-change="ctrl.render()">
 		</div>
 
-		<gf-form-switch class="gf-form" label-class="width-11" 
-		label="Last query is total" 
-		tooltip="Use the last query as total, and subtract other query values from it to show its value."
-		checked="ctrl.panel.lastQueryIsTotal" on-change="ctrl.refresh()"></gf-form-switch>
+
+		<div class="gf-form">
+			<span class="gf-form-label width-10">Color Scale</span>
+			<div class="gf-form-select-wrapper max-width-12">
+				<select class="gf-form-input" ng-model="ctrl.panel.color_scale" ng-options="v for v in ['schemeCategory10','schemeCategory20','schemeAccent', 'schemePaired', 'schemePastel1', 'schemePastel2', 'schemeSet1', 'schemeSet2', 'schemeSet3']" ng-change="ctrl.render()"></select>
+			</div>
+
+			<info-popover mode="right-absolute">Color scales links: 
+				<br>
+				<a  target="_blank"  href="https://github.com/d3/d3-scale#schemeCategory10"><u>Basic</u></a>
+
+				<br>
+				<a  target="_blank"  href="https://github.com/d3/d3-scale-chromatic#categorical"><u>Chromatic</u> </a>
+
+			</info-popover>
+
+		</div>
+
+
+		<div class="gf-form">
+			<span class="gf-form-label width-10">Color Selector</span>
+			<div class="gf-form-select-wrapper max-width-12">
+				<select class="gf-form-input" ng-model="ctrl.panel.color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
+			</div>
+			<info-popover mode="right-absolute">Color selection method. Index is the data index. The integer values is d[i] for selecting the color group</info-popover>
+		</div>
+
+
+
+		<!--
+
+		<div class="gf-form">
+			<span class="gf-form-label width-10">Tooltip</span>
+			<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.panel.node_tooltips" ng-change="ctrl.render()">
+			<info-popover mode="right-absolute">'d' is the current data point at hand.</info-popover>
+		</div>
+
+		-->
+
+
+
 
 	</div>
 
+
+
+
 	<div class="section gf-form-group">
-		<h5 class="section-heading">Legend</h5>
-		<gf-form-switch class="gf-form" label="Show Legend" label-class="width-10" checked="ctrl.panel.legend.show" on-change="ctrl.refresh()"></gf-form-switch>
+		<h5 class="section-heading">Links</h5>
+
 		<div class="gf-form">
-			<span class="gf-form-label width-10">Position</span>
-			<div class="gf-form-select-wrapper width-8">
-				<select class="gf-form-input" ng-model="ctrl.panel.legendType" ng-options="t for t in ['On graph', 'Under graph', 'Right side']" ng-change="ctrl.render()"></select>
-			</div>
+			<span class="gf-form-label width-10">Dynamic Thickness</span>
+			<gf-form-switch class="gf-form" checked="ctrl.panel.dynamic_thickness" on-change="ctrl.refresh()"></gf-form-switch>
+			<info-popover mode="right-normal">Calculate thickness of the links from the values.</info-popover>
+			
+			
 		</div>
-		<div class="gf-form" ng-if="ctrl.panel.legendType === 'On graph'">
-			<span class="gf-form-label width-10">Font size</span>
-			<div class="gf-form-select-wrapper">
-				<select class="gf-form-input" ng-model="ctrl.panel.fontSize" ng-options="s for s in ['50%', '60%', '70%', '80%', '100%', '110%', '120%', '150%', '175%']" ng-change="ctrl.render()"></select>
-			</div>
+
+
+		<div class="gf-form" ng-if="!ctrl.panel.dynamic_thickness">
+			<span class="gf-form-label width-10">Thickness</span>
+			<input type="number" class="gf-form-input max-width-10" ng-model="ctrl.panel.link_thickness" ng-change="ctrl.render()">
 		</div>
-		<gf-form-switch class="gf-form" label="Legend Values" label-class="width-10" checked="ctrl.panel.legend.values" on-change="ctrl.refresh()"></gf-form-switch>
-		<gf-form-switch class="gf-form" label="Show Percentage" label-class="width-10" checked="ctrl.panel.legend.percentage" on-change="ctrl.refresh()"></gf-form-switch>
-		<div class="gf-form" ng-show="ctrl.panel.legend.values">
-			<span class="gf-form-label width-10">Header</span>
-			<input type="text" class="gf-form-input width-8" ng-model="ctrl.panel.legend.header" ng-change="editor.render()" ng-model-onblur placeholder="override">
+
+
+
+		<gf-form-switch class="gf-form" label="Remove Noise" label-class="width-10" checked="ctrl.panel.remove_noise" on-change="ctrl.refresh()"></gf-form-switch>
+
+		<div class="gf-form" ng-if="ctrl.panel.remove_noise">
+			<span class="gf-form-label width-10">Noise Value</span>
+			<input type="number" class="gf-form-input max-width-10" ng-model="ctrl.panel.noise" ng-change="ctrl.render()">
+			<info-popover mode="right-absolute">Hide links (hence dangling nodes) that are less than the given value to remove noise.</info-popover>
 		</div>
+
+
+		<!--
+		<div class="gf-form">
+			<span class="gf-form-label width-10">Tooltip</span>
+			<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.panel.link_tooltips" ng-change="ctrl.render()">
+			<info-popover mode="right-absolute">'d' is the current data point at hand.</info-popover>
+		</div>
+		-->
+
+
 	</div>
 
 	<div class="section gf-form-group">
 		<h5 class="section-heading">Combine</h5>
-		<div class="gf-form">
-			<span class="gf-form-label width-8">Threshold:</span>
-			<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.panel.combine.threshold" ng-change="ctrl.render()">
-			<info-popover mode="right-absolute">Combines all slices that are smaller than the specified percentage (ranging from 0 to 1) i.e. a value of '0.03' will combine all slices 3% or less into one slice).</info-popover>
-		</div>
-		<div class="gf-form">
-			<span class="gf-form-label width-8">Label</span>
-			<input type="text" class="gf-form-input max-width-10" ng-model="ctrl.panel.combine.label" ng-change="ctrl.render()">
-			<info-popover mode="right-absolute">Label text for the combined slice.</info-popover>
+
+		<gf-form-switch class="gf-form" label="Active" label-class="width-10" checked="ctrl.panel.combine_active" on-change="ctrl.refresh()"></gf-form-switch>
+		
+		<div class="gf-form" ng-if="ctrl.panel.combine_active">
+			<span class="gf-form-label width-10">Method</span>
+			<div class="gf-form-select-wrapper">
+				<select class="gf-form-input" ng-model="ctrl.panel.combine_method" ng-options="s for s in ['min','max','mean','sum']" ng-change="ctrl.render()"></select>
+			</div>
+
+			<info-popover mode="right-absolute">Combine method for the second 'group by term' values. Check 'remove noise' to make sure that unwanted nodes are not hidden.</info-popover>
+
 		</div>
 	</div>
 </div>

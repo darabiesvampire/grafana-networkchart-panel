@@ -64,16 +64,14 @@ export default function link(scope, elem, attrs, ctrl) {
     return y(d,i) + 5
   }
 
-  function getCombineMethodParams(value1, value2){
-    //TODO check the method and arrange the parameters
-    return [value1, value2];
-  }
-
   function addNetworkChart() {
+    if(typeof d3 == 'undefined')
+      return;
+
     var width = elem.width();
     var height = elem.height();
 
-    var color = d3.scaleOrdinal(d3.schemeCategory10);
+    var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
 
     
     //************************ Add Caption Colors *************************/
@@ -99,7 +97,6 @@ export default function link(scope, elem, attrs, ctrl) {
     captionsEnter
       .append("circle")
       .attr("r", 10)
-      .attr("fill", (d,i) => color(i)  )
       .attr("cx", 15)
       .attr("cy", y)
 
@@ -112,6 +109,10 @@ export default function link(scope, elem, attrs, ctrl) {
 
     
     // ENTER + UPDATE
+    captionsUpdate.merge(captionsEnter)
+      .selectAll('circle')
+      .attr("fill", (d,i) => color(i)  )
+
     captionsUpdate.merge(captionsEnter)
       .selectAll('text')
       .text(d => d.text);
@@ -154,7 +155,7 @@ export default function link(scope, elem, attrs, ctrl) {
     var linkData = [];
     var nodesData = [];
 
-    if(!ctrl.panel.combine.active){
+    if(!ctrl.panel.combine_active){
      linkData = _.reduce(data, (all,d) => {
 
       //No value
@@ -192,7 +193,7 @@ export default function link(scope, elem, attrs, ctrl) {
         allTargets[target][source] = d[2];
       });
 
-      var combineMethod = _[ctrl.panel.combine.method];
+      var combineMethod = _[ctrl.panel.combine_method];
 
       var relations = {};
 
@@ -212,7 +213,7 @@ export default function link(scope, elem, attrs, ctrl) {
 
             if(!currentRel[sourceFromTarget]) currentRel[sourceFromTarget] = 0;
 
-            var param = getCombineMethodParams(value , allTargets[target][sourceFromTarget]);
+            var param = [value , allTargets[target][sourceFromTarget] ];
             currentRel[sourceFromTarget] += combineMethod(param);
           }
         }
@@ -265,10 +266,15 @@ export default function link(scope, elem, attrs, ctrl) {
       .text(d => d.id)
     */
 
+    var link_thickness = ctrl.panel.link_thickness;
+
+    if(ctrl.panel.dynamic_thickness)
+      link_thickness = d => Math.log(d.value)
+
     // ENTER + UPDATE
     linkUpdate =linkUpdate.merge(enter)
                 //.selectAll("line")
-                .attr("stroke-width", d => Math.log(d.value) );
+                .attr("stroke-width", link_thickness );
 
 
     var maxValueLogged = _.reduce(linkData, (max, d) =>{
@@ -281,7 +287,7 @@ export default function link(scope, elem, attrs, ctrl) {
 
     //************************ NODES *************************/
 
-    if(!ctrl.panel.combine.active)
+    if(!ctrl.panel.combine_active)
       nodesData = _.reduce(data, (all,d) => {
         if(!d[2])
           return all;
@@ -311,13 +317,13 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER
     // Create new elements as needed.  
     var nodeEnter = nodeUpdate.enter().append("circle")
-                    .attr("fill", d => d.group ? color(d.group) : color(0) )
-                    .on("mouseover", showTooltip)
-                    .on("mouseout", hideTooltip)
-                    .call(d3.drag()
-                      .on("start", dragstarted)
-                      .on("drag", dragged)
-                      .on("end", dragended));
+              .on("mouseover", showTooltip)
+              .on("mouseout", hideTooltip)
+              .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
 
     /*                    
     nodeEnter   
@@ -325,11 +331,15 @@ export default function link(scope, elem, attrs, ctrl) {
         .text(d => d.id);
     */
 
+    var radius = ctrl.panel.node_radius
+
+
     // ENTER + UPDATE
     nodeUpdate = nodeUpdate.merge(nodeEnter)
       //.selectAll("circle")
-      .attr("r", 10); // TODO use cummulative value for this
-      
+      .attr("r", radius) // TODO use cummulative value for this
+      .attr("fill", d => d.group ? color(d.group) : color(0) )
+
 
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink()

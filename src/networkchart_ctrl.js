@@ -9,36 +9,25 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     this.$rootScope = $rootScope;
 
     var panelDefaults = {
-      networkType: 'network',
-      legend: {
-        show: true, // disable/enable legend
-        values: true
-      },
-      links: [],
-      datasource: null,
-      maxDataPoints: 3,
-      interval: null,
-      targets: [{}],
-      cacheTimeout: null,
-      nullPointMode: 'connected',
-      legendType: 'Under graph',
-      aliasColors: {},
-      format: 'short',
-      valueName: 'current',
-      strokeWidth: 1,
-      fontSize: '80%',
+      color_scale : "schemeCategory10",
+      color_selector : "index",
+      
+      combine_active : false,
+      combine_method : "min",
 
+      dynamic_radius : false,
+      node_radius : 10,
 
-  	  combine: {
-        active: false,
-  	    method: "min"
-  	  }
+      dynamic_thickness : true,
+      link_thickness : 3,
+
+      remove_noise : false,
+      noise : 10
+      
+
     };
 
     _.defaults(this.panel, panelDefaults);
-    _.defaults(this.panel.legend, panelDefaults.legend);
-    _.defaults(this.panel.combine, panelDefaults.combine);
-
 
     //this.events.on('render', this.onRender.bind(this));
     this.events.on('data-received', this.onDataReceived.bind(this));
@@ -49,14 +38,28 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
 
   onInitEditMode() {
     this.addEditorTab('Options', 'public/plugins/grafana-networkchart-panel/editor.html', 2);
-    //this.unitFormats = kbn.getUnitFormats();
   }
 
 
   onDataError() {
     this.columnMap = [];
     this.columns = [];
+    this.data = [];
     this.render();
+  }
+
+
+  colorSelectOptions(){
+    var values = ["index"];
+
+    if(!this.columns)
+      return[];
+
+    var selectors = _.map(this.columns,"text");
+
+    selectors.splice(-1);
+    
+    return values.concat(selectors);
   }
 
 

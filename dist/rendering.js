@@ -63,16 +63,13 @@ System.register(['lodash'], function (_export, _context) {
       return y(d, i) + 5;
     }
 
-    function getCombineMethodParams(value1, value2) {
-      //TODO check the method and arrange the parameters
-      return [value1, value2];
-    }
-
     function addNetworkChart() {
+      if (typeof d3 == 'undefined') return;
+
       var width = elem.width();
       var height = elem.height();
 
-      var color = d3.scaleOrdinal(d3.schemeCategory10);
+      var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
 
       //************************ Add Caption Colors *************************/
 
@@ -94,13 +91,15 @@ System.register(['lodash'], function (_export, _context) {
       // Create new elements as needed.  
       var captionsEnter = captionsUpdate.enter().append("g");
 
-      captionsEnter.append("circle").attr("r", 10).attr("fill", function (d, i) {
-        return color(i);
-      }).attr("cx", 15).attr("cy", y);
+      captionsEnter.append("circle").attr("r", 10).attr("cx", 15).attr("cy", y);
 
       captionsEnter.append("text").attr("fill", "white").attr("x", 25).attr("y", y_plus_5);
 
       // ENTER + UPDATE
+      captionsUpdate.merge(captionsEnter).selectAll('circle').attr("fill", function (d, i) {
+        return color(i);
+      });
+
       captionsUpdate.merge(captionsEnter).selectAll('text').text(function (d) {
         return d.text;
       });
@@ -129,7 +128,7 @@ System.register(['lodash'], function (_export, _context) {
       var linkData = [];
       var nodesData = [];
 
-      if (!ctrl.panel.combine.active) {
+      if (!ctrl.panel.combine_active) {
         linkData = _.reduce(data, function (all, d) {
 
           //No value
@@ -162,7 +161,7 @@ System.register(['lodash'], function (_export, _context) {
           allTargets[target][source] = d[2];
         });
 
-        var combineMethod = _[ctrl.panel.combine.method];
+        var combineMethod = _[ctrl.panel.combine_method];
 
         var relations = {};
 
@@ -182,7 +181,7 @@ System.register(['lodash'], function (_export, _context) {
 
               if (!currentRel[sourceFromTarget]) currentRel[sourceFromTarget] = 0;
 
-              var param = getCombineMethodParams(value, allTargets[target][sourceFromTarget]);
+              var param = [value, allTargets[target][sourceFromTarget]];
               currentRel[sourceFromTarget] += combineMethod(param);
             }
           }
@@ -231,12 +230,16 @@ System.register(['lodash'], function (_export, _context) {
         .text(d => d.id)
       */
 
+      var link_thickness = ctrl.panel.link_thickness;
+
+      if (ctrl.panel.dynamic_thickness) link_thickness = function link_thickness(d) {
+        return Math.log(d.value);
+      };
+
       // ENTER + UPDATE
       linkUpdate = linkUpdate.merge(enter)
       //.selectAll("line")
-      .attr("stroke-width", function (d) {
-        return Math.log(d.value);
-      });
+      .attr("stroke-width", link_thickness);
 
       var maxValueLogged = _.reduce(linkData, function (max, d) {
         var log = Math.log(d.value);
@@ -247,7 +250,7 @@ System.register(['lodash'], function (_export, _context) {
 
       //************************ NODES *************************/
 
-      if (!ctrl.panel.combine.active) nodesData = _.reduce(data, function (all, d) {
+      if (!ctrl.panel.combine_active) nodesData = _.reduce(data, function (all, d) {
         if (!d[2]) return all;
 
         for (var i = 0; i < d.length - 1; i++) {
@@ -275,9 +278,7 @@ System.register(['lodash'], function (_export, _context) {
 
       // ENTER
       // Create new elements as needed.  
-      var nodeEnter = nodeUpdate.enter().append("circle").attr("fill", function (d) {
-        return d.group ? color(d.group) : color(0);
-      }).on("mouseover", showTooltip).on("mouseout", hideTooltip).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+      var nodeEnter = nodeUpdate.enter().append("circle").on("mouseover", showTooltip).on("mouseout", hideTooltip).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
 
       /*                    
       nodeEnter   
@@ -285,11 +286,15 @@ System.register(['lodash'], function (_export, _context) {
           .text(d => d.id);
       */
 
+      var radius = ctrl.panel.node_radius;
+
       // ENTER + UPDATE
       nodeUpdate = nodeUpdate.merge(nodeEnter)
       //.selectAll("circle")
-      .attr("r", 10); // TODO use cummulative value for this
-
+      .attr("r", radius) // TODO use cummulative value for this
+      .attr("fill", function (d) {
+        return d.group ? color(d.group) : color(0);
+      });
 
       var simulation = d3.forceSimulation().force("link", d3.forceLink().id(function (d) {
         return d.id;
