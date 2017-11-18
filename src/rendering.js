@@ -108,10 +108,15 @@ export default function link(scope, elem, attrs, ctrl) {
       .attr("y", y_plus_5);
 
     
+    var columnTexts = _.map(ctrl.columns,"text")
+
     // ENTER + UPDATE
     captionsUpdate.merge(captionsEnter)
       .selectAll('circle')
-      .attr("fill", (d,i) => color(i)  )
+      //.attr("fill", (d,i) => color(i)  )
+      .attr("fill", d => color( columnTexts.indexOf(d.text))  )
+
+
 
     captionsUpdate.merge(captionsEnter)
       .selectAll('text')

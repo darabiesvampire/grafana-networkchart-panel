@@ -95,9 +95,13 @@ System.register(['lodash'], function (_export, _context) {
 
       captionsEnter.append("text").attr("fill", "white").attr("x", 25).attr("y", y_plus_5);
 
+      var columnTexts = _.map(ctrl.columns, "text");
+
       // ENTER + UPDATE
-      captionsUpdate.merge(captionsEnter).selectAll('circle').attr("fill", function (d, i) {
-        return color(i);
+      captionsUpdate.merge(captionsEnter).selectAll('circle')
+      //.attr("fill", (d,i) => color(i)  )
+      .attr("fill", function (d) {
+        return color(columnTexts.indexOf(d.text));
       });
 
       captionsUpdate.merge(captionsEnter).selectAll('text').text(function (d) {

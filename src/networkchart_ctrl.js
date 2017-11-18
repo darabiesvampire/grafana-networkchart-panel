@@ -16,10 +16,10 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       combine_method : "min",
 
       dynamic_radius : false,
-      node_radius : 10,
+      node_radius : 5,
 
       dynamic_thickness : true,
-      link_thickness : 3,
+      link_thickness : 1,
 
       remove_noise : false,
       noise : 10
