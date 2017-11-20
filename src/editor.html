@@ -33,11 +33,21 @@
 
 
 		<div class="gf-form">
-			<span class="gf-form-label width-10">Color Selector</span>
+			<span class="gf-form-label width-10">1st Color Selector</span>
 			<div class="gf-form-select-wrapper max-width-12">
-				<select class="gf-form-input" ng-model="ctrl.panel.color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
+				<select class="gf-form-input" ng-model="ctrl.panel.first_color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
 			</div>
-			<info-popover mode="right-absolute">Color selection method. Index is the data index. The integer values is d[i] for selecting the color group</info-popover>
+			<info-popover mode="right-absolute">Color selection method. Index is the data index. The other values are used for grouping to select the color group</info-popover>
+		</div>
+
+
+
+		<div class="gf-form">
+			<span class="gf-form-label width-10">2nd Color Selector</span>
+			<div class="gf-form-select-wrapper max-width-12">
+				<select class="gf-form-input" ng-model="ctrl.panel.second_color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
+			</div>
+			<info-popover mode="right-absolute">Color selection method. Index is the data index. The other values are used for grouping to select the color group</info-popover>
 		</div>
 
 

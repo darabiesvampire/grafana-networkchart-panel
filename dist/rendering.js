@@ -71,42 +71,27 @@ System.register(['lodash'], function (_export, _context) {
 
       var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
 
-      //************************ Add Caption Colors *************************/
-
-      var columns = _.filter(ctrl.columns, function (e) {
-        return e.filterable;
-      });
-
-      var captions = d3.select(captionEle[0]);
-
-      var captionsUpdate = captions.selectAll("g").data(columns, function (d) {
-        return d.text;
-      });
-
-      // EXIT
-      // Remove old elements as needed.
-      captionsUpdate.exit().remove();
-
-      // ENTER
-      // Create new elements as needed.  
-      var captionsEnter = captionsUpdate.enter().append("g");
-
-      captionsEnter.append("circle").attr("r", 10).attr("cx", 15).attr("cy", y);
-
-      captionsEnter.append("text").attr("fill", "white").attr("x", 25).attr("y", y_plus_5);
-
+      //************************ Init Caption and Colors Data *************************/
+      var colorSelections = {};
+      var columns = [];
       var columnTexts = _.map(ctrl.columns, "text");
 
-      // ENTER + UPDATE
-      captionsUpdate.merge(captionsEnter).selectAll('circle')
-      //.attr("fill", (d,i) => color(i)  )
-      .attr("fill", function (d) {
-        return color(columnTexts.indexOf(d.text));
-      });
+      var color_data_index1 = null;
+      var default_index1;
 
-      captionsUpdate.merge(captionsEnter).selectAll('text').text(function (d) {
-        return d.text;
-      });
+      var color_data_index2 = null;
+      var default_index2;
+
+      if (ctrl.panel.first_color_selector === 'index') {
+        default_index1 = columns.length;
+        columns.push(ctrl.columns[0]);
+      } else color_data_index1 = columnTexts.indexOf(ctrl.panel.first_color_selector);
+
+      if (ctrl.panel.second_color_selector === 'index') {
+        default_index2 = columns.length;
+
+        if (!ctrl.panel.combine_active) columns.push(ctrl.columns[1]);
+      } else color_data_index2 = columnTexts.indexOf(ctrl.panel.second_color_selector);
 
       //************************ Tooltips *************************/
 
@@ -136,24 +121,26 @@ System.register(['lodash'], function (_export, _context) {
         linkData = _.reduce(data, function (all, d) {
 
           //No value
-          if (!d[2]) return all;
+          if (!d[d.length - 1]) return all;
 
           all.push({
             id: d[0] + d[1],
             source: d[0],
             target: d[1],
-            value: d[2],
-            tooltip: d[0] + ' <=> ' + d[1] + '<br>' + d[2]
+            value: d[d.length - 1],
+            tooltip: d[0] + ' <=> ' + d[1] + '<br>' + d[d.length - 1]
           });
           return all;
         }, []);
       } else {
+        var sourceGroups = {};
+
         var allSources = {};
         var allTargets = {};
 
         _.forEach(data, function (d) {
           //No value
-          if (!d[2]) return;
+          if (!d[d.length - 1]) return;
 
           var source = d[0];
           var target = d[1];
@@ -161,8 +148,10 @@ System.register(['lodash'], function (_export, _context) {
           initHash(allSources, source);
           initHash(allTargets, target);
 
-          allSources[source][target] = d[2];
-          allTargets[target][source] = d[2];
+          allSources[source][target] = d[d.length - 1];
+          allTargets[target][source] = d[d.length - 1];
+
+          if (color_data_index1 !== null) sourceGroups[source] = getGroup(d, 0);
         });
 
         var combineMethod = _[ctrl.panel.combine_method];
@@ -205,11 +194,13 @@ System.register(['lodash'], function (_export, _context) {
 
             nodesData.push({
               id: relation1,
+              group: sourceGroups[relation1],
               tooltip: relation1
             });
 
             nodesData.push({
               id: relation2,
+              group: sourceGroups[relation2],
               tooltip: relation2
             });
           }
@@ -253,17 +244,40 @@ System.register(['lodash'], function (_export, _context) {
       }, 0);
 
       //************************ NODES *************************/
+      function getGroup(d, index) {
+        var group;
+        var default_index = index === 0 ? default_index1 : default_index2;
+        var selector = index === 0 ? color_data_index1 : color_data_index2;
+
+        if (selector === null) group = default_index;else {
+          var selectorData = d[selector];
+
+          group = colorSelections[selectorData];
+          if (group === undefined) {
+            group = colorSelections[selectorData] = columns.length;
+            columns.push({
+              text: selectorData
+            });
+          }
+        }
+        return group;
+      }
 
       if (!ctrl.panel.combine_active) nodesData = _.reduce(data, function (all, d) {
-        if (!d[2]) return all;
+        if (!d[d.length - 1]) return all;
 
-        for (var i = 0; i < d.length - 1; i++) {
-          all.push({
-            id: d[i],
-            group: i,
-            tooltip: d[i]
-          });
-        } //columns[i].text
+        all.push({
+          id: d[0],
+          group: getGroup(d, 0),
+          tooltip: d[0]
+        }); //columns[i].text
+
+
+        all.push({
+          id: d[1],
+          group: getGroup(d, 1),
+          tooltip: d[1]
+        }); //columns[i].text
 
         return all;
       }, []);
@@ -315,6 +329,38 @@ System.register(['lodash'], function (_export, _context) {
       simulation.nodes(nodesData).on("tick", ticked);
 
       simulation.force("link").links(linkData);
+
+      //************************ Add Caption Colors *************************/
+      var captions = d3.select(captionEle[0]);
+
+      var captionsUpdate = captions.selectAll("g").data(columns, function (d, i) {
+        return d.text + i;
+      });
+
+      // EXIT
+      // Remove old elements as needed.
+      captionsUpdate.exit().remove();
+
+      // ENTER
+      // Create new elements as needed.  
+      var captionsEnter = captionsUpdate.enter().append("g");
+
+      captionsEnter.append("circle").attr("r", 10).attr("cx", 15).attr("cy", y);
+
+      captionsEnter.append("text").attr("fill", "white").attr("x", 25).attr("y", y_plus_5);
+
+      var colorTexts = _.map(columns, "text");
+
+      // ENTER + UPDATE
+      captionsUpdate.merge(captionsEnter).selectAll('circle')
+      //.attr("fill", (d,i) => color(i)  )
+      .attr("fill", function (d) {
+        return color(colorTexts.indexOf(d.text));
+      });
+
+      captionsUpdate.merge(captionsEnter).selectAll('text').text(function (d) {
+        return d.text;
+      });
 
       function ticked() {
         linkUpdate.attr("x1", function (d) {

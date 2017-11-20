@@ -10,7 +10,8 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
 
     var panelDefaults = {
       color_scale : "schemeCategory10",
-      color_selector : "index",
+      first_color_selector : "index",
+      second_color_selector: "index",
       
       combine_active : false,
       combine_method : "min",
