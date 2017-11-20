@@ -73,6 +73,8 @@ export default function link(scope, elem, attrs, ctrl) {
 
     var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
 
+
+    var noise = ctrl.panel.remove_noise ? ctrl.panel.noise : 1;
     
     //************************ Init Caption and Colors Data *************************/
     var colorSelections = {};
@@ -142,16 +144,17 @@ export default function link(scope, elem, attrs, ctrl) {
     if(!ctrl.panel.combine_active){
      linkData = _.reduce(data, (all,d) => {
 
+      var value = d[d.length-1];
       //No value
-      if(!d[d.length-1])
+      if(!value || value < noise)
         return all;
 
           all.push({
               id: d[0] + d[1], 
               source: d[0],
               target: d[1],
-              value:  d[d.length-1],
-              tooltip: d[0]+ ' <=> ' + d[1] + '<br>' + d[d.length-1]
+              value:  value,
+              tooltip: d[0]+ ' <=> ' + d[1] + '<br>' + value
             });
         return all;
       }
@@ -165,8 +168,10 @@ export default function link(scope, elem, attrs, ctrl) {
       var allTargets= {};
 
       _.forEach(data, d => {
+
+        var value = d[d.length-1];
         //No value
-        if(!d[d.length-1])
+        if(!value || value < noise)
           return ;
 
         var source = d[0];
@@ -175,8 +180,8 @@ export default function link(scope, elem, attrs, ctrl) {
         initHash(allSources, source);
         initHash(allTargets, target);
 
-        allSources[source][target] = d[d.length-1];
-        allTargets[target][source] = d[d.length-1];
+        allSources[source][target] = value;
+        allTargets[target][source] = value;
 
         if(color_data_index1 !== null)
           sourceGroups[source] = getGroup(d,0);  
@@ -301,7 +306,10 @@ export default function link(scope, elem, attrs, ctrl) {
 
     if(!ctrl.panel.combine_active)
       nodesData = _.reduce(data, (all,d) => {
-        if(!d[d.length-1])
+
+        var value = d[d.length-1];
+        //No value
+        if(!value || value < noise)
           return all;
 
         all.push({
