@@ -381,7 +381,7 @@ System.register(['lodash'], function (_export, _context) {
         var cx, cy;
 
         nodeUpdate.transition().duration(1000).delay(2000).attr("r", function (d) {
-          return checkHighlight(d) ? radius * 3 : radius;
+          return checkHighlight(d) ? radius * 7 : radius;
         }).attr("stroke", function (d) {
           return checkHighlight(d) ? "lightblue" : "";
         }).attr("stroke-width", function (d) {

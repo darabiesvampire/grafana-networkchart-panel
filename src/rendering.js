@@ -455,7 +455,7 @@ export default function link(scope, elem, attrs, ctrl) {
         .transition()
         .duration(1000)  
         .delay(2000) 
-        .attr("r", d => checkHighlight(d) ? radius*3 : radius)
+        .attr("r", d => checkHighlight(d) ? radius*7 : radius)
         .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
         .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
         .transition()
