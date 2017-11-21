@@ -6,7 +6,7 @@ System.register(['lodash'], function (_export, _context) {
   var _;
 
   function link(scope, elem, attrs, ctrl) {
-    var data, columns, panel;
+    var data, columns, panel, svgWrapper;
     var tooltipEle = elem.find('.tooltip');
     var captionEle = elem.find('.caption');
 
@@ -44,7 +44,7 @@ System.register(['lodash'], function (_export, _context) {
     }
 
     function addZoom(svg) {
-      var svgWrapper = svg.select('.svg-wrapper');
+      svgWrapper = svg.select('.svg-wrapper');
 
       svg.call(d3.zoom().on('zoom', function () {
 
@@ -369,6 +369,27 @@ System.register(['lodash'], function (_export, _context) {
       captionsUpdate.merge(captionsEnter).selectAll('text').text(function (d) {
         return d.text;
       });
+
+      function checkHighlight(d) {
+        return d.id.indexOf(ctrl.highlight_text) !== -1;
+      }
+
+      if (ctrl.highlight_text) {
+        //stop simiulation
+        simulation.alphaTarget(0);
+
+        var cx, cy;
+
+        nodeUpdate.transition().duration(1000).delay(2000).attr("r", function (d) {
+          return checkHighlight(d) ? radius * 3 : radius;
+        }).attr("stroke", function (d) {
+          return checkHighlight(d) ? "lightblue" : "";
+        }).attr("stroke-width", function (d) {
+          return checkHighlight(d) ? 2 : "";
+        }).transition().duration(1000).delay(1000).attr("r", radius);
+      } else if (ctrl.prev_highlight_text) {
+        nodeUpdate.attr("stroke", "").attr("stroke-width", "");
+      }
 
       function ticked() {
         linkUpdate.attr("x1", function (d) {

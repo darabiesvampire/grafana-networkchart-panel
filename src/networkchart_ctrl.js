@@ -97,6 +97,12 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
   link(scope, elem, attrs, ctrl) {
     rendering(scope, elem, attrs, ctrl);
   }
+
+
+  highlight(){
+    this.render(); 
+    this.prev_highlight_text =  this.highlight_text;
+  }
 }
 
 NetworkChartCtrl.templateUrl = 'module.html';

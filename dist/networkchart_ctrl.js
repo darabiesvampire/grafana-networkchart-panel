@@ -154,6 +154,12 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
           value: function link(scope, elem, attrs, ctrl) {
             rendering(scope, elem, attrs, ctrl);
           }
+        }, {
+          key: 'highlight',
+          value: function highlight() {
+            this.render();
+            this.prev_highlight_text = this.highlight_text;
+          }
         }]);
 
         return NetworkChartCtrl;

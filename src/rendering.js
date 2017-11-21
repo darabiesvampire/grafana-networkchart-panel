@@ -3,7 +3,7 @@ import _ from 'lodash';
 //import {event as currentEvent} from './d3-selection';
 
 export default function link(scope, elem, attrs, ctrl) {
-  var data,columns, panel;
+  var data,columns, panel, svgWrapper ;
   var tooltipEle = elem.find('.tooltip');
   var captionEle = elem.find('.caption');
 
@@ -44,7 +44,7 @@ export default function link(scope, elem, attrs, ctrl) {
   }
 
   function addZoom(svg){
-    var svgWrapper = svg.select('.svg-wrapper');
+    svgWrapper = svg.select('.svg-wrapper');
 
     svg.call(d3.zoom().on('zoom', function() {
 
@@ -367,6 +367,7 @@ export default function link(scope, elem, attrs, ctrl) {
       .attr("fill", d => d.group ? color(d.group) : color(0) )
 
 
+
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink()
         .id(d => d.id) 
@@ -438,6 +439,39 @@ export default function link(scope, elem, attrs, ctrl) {
       .selectAll('text')
       .text(d => d.text);
 
+
+
+    function checkHighlight(d) {
+      return d.id.indexOf(ctrl.highlight_text) !== -1
+    }
+
+    if(ctrl.highlight_text) {
+      //stop simiulation
+      simulation.alphaTarget(0);
+
+      var cx,cy;
+
+      nodeUpdate
+        .transition()
+        .duration(1000)  
+        .delay(2000) 
+        .attr("r", d => checkHighlight(d) ? radius*3 : radius)
+        .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
+        .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
+        .transition()
+        .duration(1000)  
+        .delay(1000) 
+        .attr("r", radius)
+
+
+
+    }
+    else if(ctrl.prev_highlight_text)
+    {
+      nodeUpdate
+      .attr("stroke", "")
+      .attr("stroke-width", "")
+    }
 
 
 
