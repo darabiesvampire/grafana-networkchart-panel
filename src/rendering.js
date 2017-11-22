@@ -74,7 +74,7 @@ export default function link(scope, elem, attrs, ctrl) {
     var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
 
 
-    var noise = ctrl.panel.remove_noise ? ctrl.panel.noise : 1;
+    var noise = ctrl.panel.remove_noise ? ctrl.panel.noise : 3;
     
     //************************ Init Caption and Colors Data *************************/
     var colorSelections = {};
