@@ -3,7 +3,7 @@ import _ from 'lodash';
 //import {event as currentEvent} from './d3-selection';
 
 export default function link(scope, elem, attrs, ctrl) {
-  var data,columns, panel, svgWrapper ;
+  var data,columns, panel, svgWrapper, highlight_text ;
   var tooltipEle = elem.find('.tooltip');
   var captionEle = elem.find('.caption');
 
@@ -442,10 +442,13 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     function checkHighlight(d) {
-      return d.id.indexOf(ctrl.highlight_text) !== -1
+      return d.tooltip.toLowerCase().indexOf(highlight_text) !== -1
     }
 
     if(ctrl.highlight_text) {
+
+      highlight_text = ctrl.highlight_text.toLowerCase()
+
       //stop simiulation
       simulation.alphaTarget(0);
 

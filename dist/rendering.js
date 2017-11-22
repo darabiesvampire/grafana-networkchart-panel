@@ -6,7 +6,7 @@ System.register(['lodash'], function (_export, _context) {
   var _;
 
   function link(scope, elem, attrs, ctrl) {
-    var data, columns, panel, svgWrapper;
+    var data, columns, panel, svgWrapper, highlight_text;
     var tooltipEle = elem.find('.tooltip');
     var captionEle = elem.find('.caption');
 
@@ -371,10 +371,13 @@ System.register(['lodash'], function (_export, _context) {
       });
 
       function checkHighlight(d) {
-        return d.id.indexOf(ctrl.highlight_text) !== -1;
+        return d.tooltip.toLowerCase().indexOf(highlight_text) !== -1;
       }
 
       if (ctrl.highlight_text) {
+
+        highlight_text = ctrl.highlight_text.toLowerCase();
+
         //stop simiulation
         simulation.alphaTarget(0);
 
