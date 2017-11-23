@@ -7,6 +7,8 @@ export default function link(scope, elem, attrs, ctrl) {
   var tooltipEle = elem.find('.tooltip');
   var captionEle = elem.find('.caption');
 
+  var theme = grafanaBootData.user.lightTheme ? '-light' : '-dark' ;
+
   elem = elem.find('.networkchart-panel');
 
 
@@ -253,6 +255,7 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER
     // Create new elements as needed.  
     var enter = linkUpdate.enter().append("line")
+                .attr("class", "line"+theme)
                 .on("mouseover", showTooltip)
                 .on("mouseout", hideTooltip)
 
@@ -397,7 +400,8 @@ export default function link(scope, elem, attrs, ctrl) {
     //************************ Add Caption Colors *************************/
     var captions = d3.select(captionEle[0]);
 
-    var captionsUpdate = captions.selectAll("g")
+    var captionsUpdate = captions
+                        .selectAll("g")
                         .data(columns, (d,i) => d.text+i);
 
 
@@ -420,7 +424,7 @@ export default function link(scope, elem, attrs, ctrl) {
 
     captionsEnter
       .append("text")
-      .attr("fill", "white")
+      .attr("class", "captions-text" + theme)
       .attr("x", 25)
       .attr("y", y_plus_5);
 
