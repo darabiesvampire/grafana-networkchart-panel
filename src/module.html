@@ -1,7 +1,5 @@
 <style type="text/css">    
-	.links line{
-		stroke:white;
-	}
+	
 
 	.networkchart-panel{
 		cursor: move;
@@ -34,7 +32,6 @@
 		width: 200px;
 		height:  95%;
 		border: 1px solid;
-	    border-color: white;
 	    border-radius: 15px;
 	}
 
@@ -50,6 +47,28 @@
 		height: 100%;
 	}
 
+
+	.captions-text-dark{
+		fill: white;
+	}
+
+	.captions-text-light{
+		fill: black;
+	}
+
+
+	.highlight {
+		border-color: black;
+	}
+
+	.links .line-dark{
+		stroke:white;
+	}
+
+	.links .line-light{
+		stroke:black;
+	}
+
 </style>
 
 <script src="/public/vendor/d3/d3.v4.min.js"></script>
@@ -62,7 +81,9 @@
 
 	<div class="next-to-captions gf-form">
 
-		<input class="gf-form-input max-width-12" 
+		<input class="gf-form-input max-width-12 highlight" 
+			bs-tooltip="'Find in the graph nodes and highlight them.'"
+			data-placement="bottom"
 			placeholder="Highlight"
 			ng-model="ctrl.highlight_text"
 			ng-model-options="{debounce: 750}" 

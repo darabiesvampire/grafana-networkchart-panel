@@ -10,6 +10,8 @@ System.register(['lodash'], function (_export, _context) {
     var tooltipEle = elem.find('.tooltip');
     var captionEle = elem.find('.caption');
 
+    var theme = grafanaBootData.user.lightTheme ? '-light' : '-dark';
+
     elem = elem.find('.networkchart-panel');
 
     ctrl.events.on('render', function () {
@@ -226,7 +228,7 @@ System.register(['lodash'], function (_export, _context) {
 
       // ENTER
       // Create new elements as needed.  
-      var enter = linkUpdate.enter().append("line").on("mouseover", showTooltip).on("mouseout", hideTooltip);
+      var enter = linkUpdate.enter().append("line").attr("class", "line" + theme).on("mouseover", showTooltip).on("mouseout", hideTooltip);
 
       /*
       enter    
@@ -371,7 +373,7 @@ System.register(['lodash'], function (_export, _context) {
 
       captionsEnter.append("circle").attr("r", 10).attr("cx", 15).attr("cy", y);
 
-      captionsEnter.append("text").attr("fill", "white").attr("x", 25).attr("y", y_plus_5);
+      captionsEnter.append("text").attr("class", "captions-text" + theme).attr("x", 25).attr("y", y_plus_5);
 
       var colorTexts = _.map(columns, "text");
 
