@@ -78,22 +78,26 @@ System.register(['lodash'], function (_export, _context) {
       var columns = [];
       var columnTexts = _.map(ctrl.columns, "text");
 
-      var color_data_index1 = null;
       var default_index1;
+      var color_regexp1;
+      var color_data_index1 = null;
 
-      var color_data_index2 = null;
       var default_index2;
+      var color_regexp2;
+      var color_data_index2 = null;
 
-      if (ctrl.panel.first_color_selector === 'index') {
+      var selector = ctrl.panel.first_color_selector;
+      if (selector === 'index') {
         default_index1 = columns.length;
         columns.push(ctrl.columns[0]);
-      } else color_data_index1 = columnTexts.indexOf(ctrl.panel.first_color_selector);
+      } else if (selector === 'regular expression') color_regexp1 = new RegExp(ctrl.panel.first_color_regexp);else color_data_index1 = columnTexts.indexOf(selector);
 
-      if (ctrl.panel.second_color_selector === 'index') {
+      selector = ctrl.panel.second_color_selector;
+      if (selector === 'index') {
         default_index2 = columns.length;
 
         if (!ctrl.panel.combine_active) columns.push(ctrl.columns[1]);
-      } else color_data_index2 = columnTexts.indexOf(ctrl.panel.second_color_selector);
+      } else if (selector === 'regular expression') color_regexp2 = new RegExp(ctrl.panel.first_color_regexp);else color_data_index2 = columnTexts.indexOf(selector);
 
       //************************ Tooltips *************************/
 
@@ -156,7 +160,7 @@ System.register(['lodash'], function (_export, _context) {
           allSources[source][target] = value;
           allTargets[target][source] = value;
 
-          if (color_data_index1 !== null) sourceGroups[source] = getGroup(d, 0);
+          if (color_data_index1 !== null || color_regexp1) sourceGroups[source] = getGroup(d, 0);
         });
 
         var combineMethod = _[ctrl.panel.combine_method];
@@ -253,10 +257,19 @@ System.register(['lodash'], function (_export, _context) {
         var group;
         var default_index = index === 0 ? default_index1 : default_index2;
         var selector = index === 0 ? color_data_index1 : color_data_index2;
+        var regExp = index === 0 ? color_regexp1 : color_regexp2;
 
-        if (selector === null) group = default_index;else {
-          var selectorData = d[selector];
+        var selectorData;
 
+        if (selector !== null) selectorData = d[selector];
+
+        if (regExp) {
+          var result = regExp.exec(d[index]);
+
+          if (result.length) selectorData = result[result.length - 1];
+        }
+
+        if (selectorData) {
           group = colorSelections[selectorData];
           if (group === undefined) {
             group = colorSelections[selectorData] = columns.length;
@@ -264,7 +277,8 @@ System.register(['lodash'], function (_export, _context) {
               text: selectorData
             });
           }
-        }
+        } else group = default_index;
+
         return group;
       }
 

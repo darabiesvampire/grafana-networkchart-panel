@@ -11,7 +11,10 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     var panelDefaults = {
       color_scale : "schemeCategory10",
       first_color_selector : "index",
+      first_color_regexp : "(.+?)\\/",
+
       second_color_selector: "index",
+      second_color_regexp : "(.+?)\\/",
       
       combine_active : false,
       combine_method : "min",
@@ -51,7 +54,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
 
 
   colorSelectOptions(){
-    var values = ["index"];
+    var values = ["index","regular expression"];
 
     if(!this.columns)
       return[];

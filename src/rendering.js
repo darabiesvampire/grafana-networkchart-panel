@@ -81,28 +81,37 @@ export default function link(scope, elem, attrs, ctrl) {
     var columns = [];
     var columnTexts = _.map(ctrl.columns,"text")
 
-    var color_data_index1 = null;
     var default_index1;
-
-    var color_data_index2 = null;
-    var default_index2;
+    var color_regexp1;
+    var color_data_index1 = null;
     
-    if(ctrl.panel.first_color_selector === 'index'){
+    var default_index2;
+    var color_regexp2;
+    var color_data_index2 = null;
+
+
+    var selector = ctrl.panel.first_color_selector;
+    if(selector === 'index'){
       default_index1= columns.length; 
       columns.push(ctrl.columns[0])
     }
+    else if(selector === 'regular expression')
+      color_regexp1 = new RegExp(ctrl.panel.first_color_regexp);
     else
-      color_data_index1 =  columnTexts.indexOf(ctrl.panel.first_color_selector);
+      color_data_index1 =  columnTexts.indexOf(selector); 
 
 
-    if(ctrl.panel.second_color_selector === 'index'){
+    selector = ctrl.panel.second_color_selector;
+    if(selector === 'index'){
       default_index2= columns.length;
 
       if(!ctrl.panel.combine_active)
         columns.push(ctrl.columns[1])
     }
+    else if(selector === 'regular expression')
+      color_regexp2 = new RegExp(ctrl.panel.first_color_regexp);
     else
-      color_data_index2 =  columnTexts.indexOf(ctrl.panel.second_color_selector);
+      color_data_index2 =  columnTexts.indexOf(selector);
 
 
     //************************ Tooltips *************************/
@@ -183,7 +192,7 @@ export default function link(scope, elem, attrs, ctrl) {
         allSources[source][target] = value;
         allTargets[target][source] = value;
 
-        if(color_data_index1 !== null)
+        if(color_data_index1 !== null || color_regexp1)
           sourceGroups[source] = getGroup(d,0);  
       });
 
@@ -286,12 +295,21 @@ export default function link(scope, elem, attrs, ctrl) {
       var group;
       var default_index = index === 0 ? default_index1 : default_index2;
       var selector = index === 0 ? color_data_index1 : color_data_index2;
+      var regExp = index === 0 ? color_regexp1 : color_regexp2;
       
-      if(selector === null)
-        group = default_index;
-      else{
-        var selectorData = d[selector];
+      var selectorData ;
+      
+      if(selector !== null)
+        selectorData = d[selector];
 
+      if(regExp){
+        var result =regExp.exec(d[index]);
+
+        if(result.length)
+          selectorData = result[result.length-1];
+      }
+
+      if(selectorData){
         group = colorSelections[selectorData];
         if(group === undefined)
         {
@@ -301,8 +319,13 @@ export default function link(scope, elem, attrs, ctrl) {
           });
         }
       }
+      else
+        group = default_index;
+
       return group;
     }
+
+
 
     if(!ctrl.panel.combine_active)
       nodesData = _.reduce(data, (all,d) => {

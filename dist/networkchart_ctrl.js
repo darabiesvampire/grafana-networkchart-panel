@@ -75,7 +75,10 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
           var panelDefaults = {
             color_scale: "schemeCategory10",
             first_color_selector: "index",
+            first_color_regexp: "(.+?)\\/",
+
             second_color_selector: "index",
+            second_color_regexp: "(.+?)\\/",
 
             combine_active: false,
             combine_method: "min",
@@ -117,7 +120,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
         }, {
           key: 'colorSelectOptions',
           value: function colorSelectOptions() {
-            var values = ["index"];
+            var values = ["index", "regular expression"];
 
             if (!this.columns) return [];
 

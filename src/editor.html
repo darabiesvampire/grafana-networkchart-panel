@@ -37,8 +37,33 @@
 			<div class="gf-form-select-wrapper max-width-12">
 				<select class="gf-form-input" ng-model="ctrl.panel.first_color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
 			</div>
-			<info-popover mode="right-absolute">Color selection method. Index is the data index. The other values are used for grouping to select the color group</info-popover>
+
+			<info-popover mode="right-absolute">Color selection method: 
+				<br>
+				<ul style="padding-left: 10px">
+					<li>Index is the data index</li>
+
+					<li>Regex is the regular expression selection</li>
+
+					<li>The other values are used for grouping to select the color group</li>
+
+				</ul>
+			</info-popover>
+
+
 		</div>
+
+
+		<div class="gf-form" ng-if="ctrl.panel.first_color_selector==='regular expression'">
+			<span class="gf-form-label width-10">1st Color RegExp </span>
+			<div class="gf-form-select-wrapper max-width-12">
+				<input type="text" class="gf-form-input max-width-12" ng-model="ctrl.panel.first_color_regexp" ng-change="ctrl.render()">
+			</div>
+
+			<info-popover mode="right-absolute">Regular expression to group on.
+			</info-popover>
+		</div>
+
 
 
 
@@ -47,9 +72,30 @@
 			<div class="gf-form-select-wrapper max-width-12">
 				<select class="gf-form-input" ng-model="ctrl.panel.second_color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
 			</div>
-			<info-popover mode="right-absolute">Color selection method. Index is the data index. The other values are used for grouping to select the color group</info-popover>
+			
+			<info-popover mode="right-absolute">Color selection method: 
+				<br>
+				<ul style="padding-left: 10px">
+					<li>Index is the data index</li>
+
+					<li>Regex is the regular expression selection</li>
+
+					<li>The other values are used for grouping to select the color group</li>
+
+				</ul>
+			</info-popover>
 		</div>
 
+
+		<div class="gf-form" ng-if="ctrl.panel.second_color_selector==='regular expression'">
+			<span class="gf-form-label width-10">2nd Color RegExp </span>
+			<div class="gf-form-select-wrapper max-width-12">
+				<input type="text" class="gf-form-input max-width-12" ng-model="ctrl.panel.second_color_regexp" ng-change="ctrl.render()">
+			</div>
+
+			<info-popover mode="right-absolute">Regular expression to group on.
+			</info-popover>
+		</div>
 
 
 		<!--
