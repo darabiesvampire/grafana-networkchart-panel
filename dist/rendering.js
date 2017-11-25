@@ -355,7 +355,9 @@ System.register(['lodash'], function (_export, _context) {
       //************************ Add Caption Colors *************************/
       var captions = d3.select(captionEle[0]);
 
-      var captionsUpdate = captions.selectAll("g").data(columns, function (d, i) {
+      var columnsSorted = _.sortBy(columns, "text");
+
+      var captionsUpdate = captions.selectAll("g").data(columnsSorted, function (d, i) {
         return d.text + i;
       });
 

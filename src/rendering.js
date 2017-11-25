@@ -420,8 +420,10 @@ export default function link(scope, elem, attrs, ctrl) {
     //************************ Add Caption Colors *************************/
     var captions = d3.select(captionEle[0]);
 
+    var columnsSorted = _.sortBy(columns,"text")
+    
     var captionsUpdate = captions.selectAll("g")
-                        .data(columns, (d,i) => d.text+i);
+                        .data(columnsSorted, (d,i) => d.text+i);
 
 
     // EXIT
