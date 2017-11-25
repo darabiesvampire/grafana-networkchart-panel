@@ -122,7 +122,7 @@
 		<div class="gf-form">
 			<span class="gf-form-label width-10">Dynamic Thickness</span>
 			<gf-form-switch class="gf-form" checked="ctrl.panel.dynamic_thickness" on-change="ctrl.refresh()"></gf-form-switch>
-			<info-popover mode="right-normal">Calculate thickness of the links from the values.</info-popover>
+			<info-popover mode="right-normal">Calculate thickness of the egdes from the values.</info-popover>
 			
 			
 		</div>
@@ -140,7 +140,7 @@
 		<div class="gf-form" ng-if="ctrl.panel.remove_noise">
 			<span class="gf-form-label width-10">Noise Threshold</span>
 			<input type="number" class="gf-form-input max-width-10" ng-model="ctrl.panel.noise" ng-change="ctrl.render()">
-			<info-popover mode="right-absolute">Hide links (hence dangling nodes) that are less than the given value for noise canceling.</info-popover>
+			<info-popover mode="right-absolute">Hide egdes (hence dangling nodes) that are less than the given value for noise canceling.</info-popover>
 		</div>
 
 
