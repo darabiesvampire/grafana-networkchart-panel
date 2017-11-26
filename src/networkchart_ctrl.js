@@ -4,9 +4,10 @@ import rendering from './rendering';
 
 export class NetworkChartCtrl extends MetricsPanelCtrl {
 
-  constructor($scope, $injector, $rootScope) {
+  constructor($scope, $injector, $rootScope, $parse) {
     super($scope, $injector);
     this.$rootScope = $rootScope;
+    this.$parse = $parse;
 
     var panelDefaults = {
       color_scale : "schemeCategory10",
@@ -25,6 +26,9 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       dynamic_thickness : true,
       link_thickness : 1,
 
+
+      hide_internal_relationships: false,
+      
       remove_noise : false,
       noise : 10
       
@@ -92,6 +96,18 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
 
     this.columnMap = data.columnMap; 
     this.columns = data.columns; 
+
+    if(! this.panel.first_term_tooltip &&  this.columns[0])
+    {
+     this.panel.first_term_tooltip=  "{{" + this.columns[0].text + "}}";
+    }
+
+
+    if(! this.panel.second_term_tooltip &&  this.columns[1])
+    {
+     this.panel.second_term_tooltip=  "{{" + this.columns[1].text + "}}";
+    }
+
     this.data = data.rows; //this.parsecolumnMap(this.columnMap);
     this.render(this.data);
   }

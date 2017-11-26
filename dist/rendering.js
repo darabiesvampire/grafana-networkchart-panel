@@ -142,8 +142,6 @@ System.register(['lodash'], function (_export, _context) {
           return all;
         }, []);
       } else {
-        var sourceGroups = {};
-
         var allSources = {};
         var allTargets = {};
 
@@ -162,7 +160,7 @@ System.register(['lodash'], function (_export, _context) {
           allSources[source][target] = value;
           allTargets[target][source] = value;
 
-          if (color_data_index1 !== null || color_regexp1) sourceGroups[source] = getGroup(d, 0);
+          if (color_data_index1 !== null || color_regexp1) allSources[source].group = getGroup(d, 0);
         });
 
         var combineMethod = _[ctrl.panel.combine_method];
@@ -183,6 +181,8 @@ System.register(['lodash'], function (_export, _context) {
               //Already calculated at the other end
               if (relations[sourceFromTarget]) continue;
 
+              if (ctrl.panel.hide_internal_relationships && allSources[source].group === allSources[sourceFromTarget].group) continue;
+
               if (!currentRel[sourceFromTarget]) currentRel[sourceFromTarget] = 0;
 
               var param = [value, allTargets[target][sourceFromTarget]];
@@ -193,6 +193,7 @@ System.register(['lodash'], function (_export, _context) {
 
         for (var relation1 in relations) {
           for (var relation2 in relations[relation1]) {
+
             var value = relations[relation1][relation2];
 
             linkData.push({
@@ -205,13 +206,13 @@ System.register(['lodash'], function (_export, _context) {
 
             nodesData.push({
               id: relation1,
-              group: sourceGroups[relation1],
+              group: allSources[relation1].group,
               tooltip: relation1
             });
 
             nodesData.push({
               id: relation2,
-              group: sourceGroups[relation2],
+              group: allSources[relation2].group,
               tooltip: relation2
             });
           }
