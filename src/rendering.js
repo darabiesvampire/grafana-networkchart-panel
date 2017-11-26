@@ -66,6 +66,40 @@ export default function link(scope, elem, attrs, ctrl) {
     return y(d,i) + 5
   }
 
+  var firstTooltipEval;
+  var secondTooltipEval;
+
+  function parseTooltip(tooltip,columnTexts){
+      var regExp=/{{(.*?)}}/g;    
+      var tooltipEval = tooltip;
+      var match;
+      do {
+          match = regExp.exec(tooltip);
+          if (match){
+            var index = columnTexts.indexOf(match[1]);
+            var replaceWith = index!== -1 ? `d[${index}]` : "";
+
+            tooltipEval = tooltipEval.replace(match[1], replaceWith)
+          }
+      } while (match);
+
+      return tooltipEval;
+  }
+
+  function createTooltipEvals(columnTexts){
+
+    var firstTooltip = ctrl.panel.first_term_tooltip;
+
+    firstTooltipEval = firstTooltip && columnTexts && columnTexts.length? parseTooltip(firstTooltip,columnTexts) : "{{d[0]}}";
+    firstTooltipEval = ctrl.$interpolate(firstTooltipEval);
+
+
+    var secondTooltip = ctrl.panel.second_term_tooltip;
+
+    secondTooltipEval = secondTooltip && columnTexts && columnTexts.length? parseTooltip(secondTooltip,columnTexts) : "{{d[1]}}";
+    secondTooltipEval = ctrl.$interpolate(secondTooltipEval);
+  }
+
   function addNetworkChart() {
     if(typeof d3 == 'undefined')
       return;
@@ -117,6 +151,8 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     //************************ Tooltips *************************/
+
+    createTooltipEvals(columnTexts);
 
     var tooltip = d3.select(tooltipEle[0])
                   .style("opacity", 0);
@@ -192,6 +228,8 @@ export default function link(scope, elem, attrs, ctrl) {
         allSources[source][target] = value;
         allTargets[target][source] = value;
 
+        allSources[source].tooltip = firstTooltipEval({d: d})
+
         if(color_data_index1 !== null || color_regexp1)
           allSources[source].group = getGroup(d,0);  
       });
@@ -241,13 +279,13 @@ export default function link(scope, elem, attrs, ctrl) {
           nodesData.push({
             id: relation1 ,
             group: allSources[relation1].group,
-            tooltip: relation1
+            tooltip: allSources[relation1].tooltip,
           });
 
           nodesData.push({
             id: relation2 ,
             group: allSources[relation2].group ,
-            tooltip: relation2
+            tooltip: allSources[relation2].tooltip,
           });
 
         }
@@ -343,14 +381,14 @@ export default function link(scope, elem, attrs, ctrl) {
         all.push({
             id: d[0], 
             group: getGroup(d, 0),
-            tooltip: d[0]
+            tooltip: firstTooltipEval({d: d})
           }); //columns[i].text
 
 
         all.push({
             id: d[1], 
             group: getGroup(d, 1),
-            tooltip: d[1]
+            tooltip: secondTooltipEval({d: d})
           }); //columns[i].text
             
           return all;

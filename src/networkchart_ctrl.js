@@ -4,10 +4,10 @@ import rendering from './rendering';
 
 export class NetworkChartCtrl extends MetricsPanelCtrl {
 
-  constructor($scope, $injector, $rootScope, $parse) {
+  constructor($scope, $injector, $rootScope, $interpolate) {
     super($scope, $injector);
     this.$rootScope = $rootScope;
-    this.$parse = $parse;
+    this.$interpolate = $interpolate;
 
     var panelDefaults = {
       color_scale : "schemeCategory10",

@@ -65,12 +65,13 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
       _export('NetworkChartCtrl', NetworkChartCtrl = function (_MetricsPanelCtrl) {
         _inherits(NetworkChartCtrl, _MetricsPanelCtrl);
 
-        function NetworkChartCtrl($scope, $injector, $rootScope) {
+        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate) {
           _classCallCheck(this, NetworkChartCtrl);
 
           var _this = _possibleConstructorReturn(this, (NetworkChartCtrl.__proto__ || Object.getPrototypeOf(NetworkChartCtrl)).call(this, $scope, $injector));
 
           _this.$rootScope = $rootScope;
+          _this.$interpolate = $interpolate;
 
           var panelDefaults = {
             color_scale: "schemeCategory10",
@@ -151,6 +152,15 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
 
             this.columnMap = data.columnMap;
             this.columns = data.columns;
+
+            if (!this.panel.first_term_tooltip && this.columns[0]) {
+              this.panel.first_term_tooltip = "{{" + this.columns[0].text + "}}";
+            }
+
+            if (!this.panel.second_term_tooltip && this.columns[1]) {
+              this.panel.second_term_tooltip = "{{" + this.columns[1].text + "}}";
+            }
+
             this.data = data.rows; //this.parsecolumnMap(this.columnMap);
             this.render(this.data);
           }
