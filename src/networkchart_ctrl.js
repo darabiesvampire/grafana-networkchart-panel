@@ -70,6 +70,16 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     return values.concat(selectors);
   }
 
+  combineOptions(){
+    if(!this.columns || this.columns.length < 2)
+      return[];
+
+    return [
+      this.columns[0].text ,
+      this.columns[1].text ,
+      ];
+  }
+
 
   /*
   onRender() {
@@ -100,6 +110,12 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     if(! this.panel.first_term_tooltip &&  this.columns[0])
     {
      this.panel.first_term_tooltip=  "{{" + this.columns[0].text + "}}";
+    }
+
+
+    if(! this.panel.combine_to_show &&  this.columns[0])
+    {
+     this.panel.combine_to_show=  this.columns[0].text;
     }
 
 

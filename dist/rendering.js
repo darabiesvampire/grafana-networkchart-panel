@@ -65,8 +65,7 @@ System.register(['lodash'], function (_export, _context) {
       return y(d, i) + 5;
     }
 
-    var firstTooltipEval;
-    var secondTooltipEval;
+    var tooltipEvals = [];
 
     function parseTooltip(tooltip, columnTexts) {
       var regExp = /{{(.*?)}}/g;
@@ -89,13 +88,23 @@ System.register(['lodash'], function (_export, _context) {
 
       var firstTooltip = ctrl.panel.first_term_tooltip;
 
-      firstTooltipEval = firstTooltip && columnTexts && columnTexts.length ? parseTooltip(firstTooltip, columnTexts) : "{{d[0]}}";
-      firstTooltipEval = ctrl.$interpolate(firstTooltipEval);
+      var tooltipEvalText1 = firstTooltip && columnTexts && columnTexts.length ? parseTooltip(firstTooltip, columnTexts) : "{{d[0]}}";
+      tooltipEvals[0] = ctrl.$interpolate(tooltipEvalText1);
 
       var secondTooltip = ctrl.panel.second_term_tooltip;
 
-      secondTooltipEval = secondTooltip && columnTexts && columnTexts.length ? parseTooltip(secondTooltip, columnTexts) : "{{d[1]}}";
-      secondTooltipEval = ctrl.$interpolate(secondTooltipEval);
+      var tooltipEvalText2 = secondTooltip && columnTexts && columnTexts.length ? parseTooltip(secondTooltip, columnTexts) : "{{d[1]}}";
+      tooltipEvals[1] = ctrl.$interpolate(tooltipEvalText2);
+    }
+
+    function combineFieldIndex(columnTexts) {
+      if (ctrl.panel.combine_to_show) {
+        var showWhichIndex = columnTexts.indexOf(ctrl.panel.combine_to_show);
+
+        if (showWhichIndex !== -1) return showWhichIndex;
+      }
+
+      return 0;
     }
 
     function addNetworkChart() {
@@ -130,8 +139,7 @@ System.register(['lodash'], function (_export, _context) {
       selector = ctrl.panel.second_color_selector;
       if (selector === 'index') {
         default_index2 = columns.length;
-
-        if (!ctrl.panel.combine_active) columns.push(ctrl.columns[1]);
+        columns.push(ctrl.columns[1]);
       } else if (selector === 'regular expression') color_regexp2 = new RegExp(ctrl.panel.first_color_regexp);else color_data_index2 = columnTexts.indexOf(selector);
 
       //************************ Tooltips *************************/
@@ -177,6 +185,9 @@ System.register(['lodash'], function (_export, _context) {
           return all;
         }, []);
       } else {
+        var sourceIndex = combineFieldIndex(columnTexts);
+        var targetIndex = +!sourceIndex;
+
         var allSources = {};
         var allTargets = {};
 
@@ -186,8 +197,8 @@ System.register(['lodash'], function (_export, _context) {
           //No value
           if (!value || value < noise) return;
 
-          var source = d[0];
-          var target = d[1];
+          var source = d[sourceIndex];
+          var target = d[targetIndex];
 
           initHash(allSources, source);
           initHash(allTargets, target);
@@ -195,9 +206,9 @@ System.register(['lodash'], function (_export, _context) {
           allSources[source][target] = value;
           allTargets[target][source] = value;
 
-          allSources[source].tooltip = firstTooltipEval({ d: d });
+          allSources[source].tooltip = tooltipEvals[sourceIndex]({ d: d });
 
-          if (color_data_index1 !== null || color_regexp1) allSources[source].group = getGroup(d, 0);
+          if (color_data_index1 !== null || color_regexp1) allSources[source].group = getGroup(d, sourceIndex);
         });
 
         var combineMethod = _[ctrl.panel.combine_method];
@@ -331,14 +342,14 @@ System.register(['lodash'], function (_export, _context) {
         all.push({
           id: d[0],
           group: getGroup(d, 0),
-          tooltip: firstTooltipEval({ d: d })
+          tooltip: tooltipEvals[0]({ d: d })
         }); //columns[i].text
 
 
         all.push({
           id: d[1],
           group: getGroup(d, 1),
-          tooltip: secondTooltipEval({ d: d })
+          tooltip: tooltipEvals[1]({ d: d })
         }); //columns[i].text
 
         return all;

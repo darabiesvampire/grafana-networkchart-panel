@@ -134,6 +134,13 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             return values.concat(selectors);
           }
         }, {
+          key: 'combineOptions',
+          value: function combineOptions() {
+            if (!this.columns || this.columns.length < 2) return [];
+
+            return [this.columns[0].text, this.columns[1].text];
+          }
+        }, {
           key: 'onDataReceived',
           value: function onDataReceived(dataList) {
             var data = dataList[0];
@@ -155,6 +162,10 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
 
             if (!this.panel.first_term_tooltip && this.columns[0]) {
               this.panel.first_term_tooltip = "{{" + this.columns[0].text + "}}";
+            }
+
+            if (!this.panel.combine_to_show && this.columns[0]) {
+              this.panel.combine_to_show = this.columns[0].text;
             }
 
             if (!this.panel.second_term_tooltip && this.columns[1]) {
