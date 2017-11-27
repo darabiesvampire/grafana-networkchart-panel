@@ -37,7 +37,7 @@
 		<h5 class="section-heading">First Term Nodes</h5>
 
 		<div class="gf-form">
-			<span class="gf-form-label width-10">Color Selector</span>
+			<span class="gf-form-label width-10">Color Selection on</span>
 			<div class="gf-form-select-wrapper max-width-12">
 				<select class="gf-form-input" ng-model="ctrl.panel.first_color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
 			</div>
@@ -88,7 +88,7 @@
 		<h5 class="section-heading">Second Term Nodes</h5>
 
 		<div class="gf-form">
-			<span class="gf-form-label width-10">Color Selector</span>
+			<span class="gf-form-label width-10">Color Selection on</span>
 			<div class="gf-form-select-wrapper max-width-12">
 				<select class="gf-form-input" ng-model="ctrl.panel.second_color_selector" ng-options="v for v in ctrl.colorSelectOptions()" ng-change="ctrl.render()"></select>
 			</div>
@@ -188,19 +188,19 @@
 		<gf-form-switch class="gf-form" label="Active" label-class="width-12" checked="ctrl.panel.combine_active" on-change="ctrl.refresh()"></gf-form-switch>
 		
 		<div class="gf-form" ng-if="ctrl.panel.combine_active">
-			<span class="gf-form-label width-12">Method</span>
+			<span class="gf-form-label width-12">Edge Value Calc. Method</span>
 			<div class="gf-form-select-wrapper">
 				<select class="gf-form-input" ng-model="ctrl.panel.combine_method" ng-options="s for s in ['min','max','mean','sum']" ng-change="ctrl.render()"></select>
 			</div>
 
-			<info-popover mode="right-absolute">Combine method for the second 'group by term' values. Check 'remove noise' to make sure that unwanted nodes are not hidden.</info-popover>
+			<info-popover style="right: 2rem;" mode="right-absolute">Combine method for the second 'group by term' values. Check 'remove noise' to make sure that unwanted nodes are not hidden.</info-popover>
 
 		</div>
 
 		<div class="gf-form"  ng-if="ctrl.panel.combine_active">
 			<span class="gf-form-label width-12">Hide Internal Relations</span>
 			<gf-form-switch class="gf-form" checked="ctrl.panel.hide_internal_relationships" on-change="ctrl.refresh()"></gf-form-switch>
-			<info-popover mode="right-normal">Shows external relations only. Hides the relationshiphs where nodes are in the same group (Color selector group).</info-popover>
+			<info-popover mode="right-normal">Shows external relations only. Hides the relationshiphs where the nodes are in the same group (Color selector group).</info-popover>
 			
 		</div>
 
