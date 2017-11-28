@@ -195,6 +195,8 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     //************************ Links between nodes *************************/
+
+    var totals = {};
     var linkData = [];
     var nodesData = [];
 
@@ -213,6 +215,10 @@ export default function link(scope, elem, attrs, ctrl) {
               value:  value,
               tooltip: d[0]+ ' <=> ' + d[1] + '<br>' + value
             });
+
+        setTotalsHash(totals, d[0], value);
+        setTotalsHash(totals, d[1], value);
+
         return all;
       }
       , []);
@@ -289,20 +295,29 @@ export default function link(scope, elem, attrs, ctrl) {
                 tooltip: relation1+ ' <=> ' + relation2 + '<br>' + value
               });
 
+          setTotalsHash(totals, relation1, value);
+          setTotalsHash(totals, relation2, value);
+        }
+      }
+
+      for (var relation1 in relations) {
+        for (var relation2 in relations[relation1]) {          
           nodesData.push({
             id: relation1 ,
             group: allSources[relation1].group,
-            tooltip: allSources[relation1].tooltip,
+            tooltip: allSources[relation1].tooltip + getTotalTooltip(relation1)
           });
 
           nodesData.push({
             id: relation2 ,
             group: allSources[relation2].group ,
-            tooltip: allSources[relation2].tooltip,
+            tooltip: allSources[relation2].tooltip + getTotalTooltip(relation2)
           });
 
         }
       }
+
+
     }
 
 
@@ -383,6 +398,11 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
 
+    function getTotalTooltip(key){
+      var totalObj = totals[key];
+      return "<br/> Total:" + totalObj.value + "&nbsp;&nbsp; Edge Count:"  + totalObj.count;
+    }
+
     if(!ctrl.panel.combine_active)
       nodesData = _.reduce(data, (all,d) => {
 
@@ -394,14 +414,14 @@ export default function link(scope, elem, attrs, ctrl) {
         all.push({
             id: d[0], 
             group: getGroup(d, 0),
-            tooltip: tooltipEvals[0]({d: d})
+            tooltip: tooltipEvals[0]({d: d}) + getTotalTooltip(d[0])
           }); //columns[i].text
 
 
         all.push({
             id: d[1], 
             group: getGroup(d, 1),
-            tooltip: tooltipEvals[1]({d: d})
+            tooltip: tooltipEvals[1]({d: d}) + getTotalTooltip(d[1])
           }); //columns[i].text
             
           return all;
@@ -588,8 +608,22 @@ export default function link(scope, elem, attrs, ctrl) {
     }
 
     function initHash(hash,key) {
-      if (!hash[key])
+      if (!hash[key]){
         hash[key]= {};
+        return true;
+      }
+
+      return false;
+    }
+
+
+    function setTotalsHash(hash,key, value){
+      if(initHash(hash,key)){
+        hash[key].count = 0;
+        hash[key].value = 0;
+      }
+      hash[key].value += value;
+      hash[key].count ++;
     }
 
   }
