@@ -93,7 +93,10 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             hide_internal_relationships: false,
 
             remove_noise: false,
-            noise: 10
+            noise: 100,
+
+            nodes_remove_noise: false,
+            nodes_noise: 1000
 
           };
 

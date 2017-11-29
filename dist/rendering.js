@@ -116,6 +116,7 @@ System.register(['lodash'], function (_export, _context) {
       var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
 
       var noise = ctrl.panel.remove_noise ? ctrl.panel.noise : 3;
+      var nodes_noise = ctrl.panel.nodes_remove_noise ? ctrl.panel.nodes_noise : 0;
 
       //************************ Init Caption and Colors Data *************************/
       var colorSelections = {};
@@ -170,27 +171,7 @@ System.register(['lodash'], function (_export, _context) {
       var linkData = [];
       var nodesData = [];
 
-      if (!ctrl.panel.combine_active) {
-        linkData = _.reduce(data, function (all, d) {
-
-          var value = d[d.length - 1];
-          //No value
-          if (!value || value < noise) return all;
-
-          all.push({
-            id: d[0] + d[1],
-            source: d[0],
-            target: d[1],
-            value: value,
-            tooltip: d[0] + ' <=> ' + d[1] + '<br>' + value
-          });
-
-          setTotalsHash(totals, d[0], value);
-          setTotalsHash(totals, d[1], value);
-
-          return all;
-        }, []);
-      } else {
+      if (ctrl.panel.combine_active) {
         var sourceIndex = combineFieldIndex(columnTexts);
         var targetIndex = +!sourceIndex;
 
@@ -250,14 +231,6 @@ System.register(['lodash'], function (_export, _context) {
 
             var value = relations[relation1][relation2];
 
-            linkData.push({
-              id: relation1 + relation2,
-              source: relation1,
-              target: relation2,
-              value: value,
-              tooltip: relation1 + ' <=> ' + relation2 + '<br>' + value
-            });
-
             setTotalsHash(totals, relation1, value);
             setTotalsHash(totals, relation2, value);
           }
@@ -265,6 +238,11 @@ System.register(['lodash'], function (_export, _context) {
 
         for (var relation1 in relations) {
           for (var relation2 in relations[relation1]) {
+            var addFirst = totals[relation1].value > nodes_noise;
+            var addSecond = totals[relation2].value > nodes_noise;
+
+            if (!addFirst && !addSecond) continue;
+
             nodesData.push({
               id: relation1,
               group: allSources[relation1].group,
@@ -276,9 +254,71 @@ System.register(['lodash'], function (_export, _context) {
               group: allSources[relation2].group,
               tooltip: allSources[relation2].tooltip + getTotalTooltip(relation2)
             });
+
+            var value = relations[relation1][relation2];
+
+            linkData.push({
+              id: relation1 + relation2,
+              source: relation1,
+              target: relation2,
+              value: value,
+              tooltip: relation1 + ' <=> ' + relation2 + '<br>' + value
+            });
           }
         }
+      } else {
+        _.forEach(data, function (d) {
+          var value = d[d.length - 1];
+
+          if (!value || value < noise) return;
+
+          setTotalsHash(totals, d[0], value);
+          setTotalsHash(totals, d[1], value);
+        });
+
+        _.forEach(data, function (d) {
+          var value = d[d.length - 1];
+
+          if (!value || value < noise) return;
+
+          var firstNode = d[0];
+          var secondNode = d[1];
+
+          if (nodes_noise) {
+            var addFirst = totals[firstNode].value > nodes_noise;
+            var addSecond = totals[secondNode].value > nodes_noise;
+
+            if (!addFirst && !addSecond) return;
+          }
+
+          linkData.push({
+            id: firstNode + secondNode,
+            source: firstNode,
+            target: secondNode,
+            value: value,
+            tooltip: firstNode + " <=> " + secondNode + " <br> " + value
+          });
+
+          nodesData.push({
+            id: firstNode,
+            group: getGroup(d, 0),
+            tooltip: tooltipEvals[0]({ d: d }) + getTotalTooltip(firstNode)
+          }); //columns[i].text
+
+          nodesData.push({
+            id: secondNode,
+            group: getGroup(d, 1),
+            tooltip: tooltipEvals[1]({ d: d }) + getTotalTooltip(secondNode)
+          }); //columns[i].text
+        });
       }
+
+      nodesData = _.uniqBy(nodesData, function (d) {
+        return d.id;
+      });
+
+      //************************ Links d3 *************************/
+
 
       var linkUpdate = svg.select(".links").selectAll("line").data(linkData, function (d) {
         return d.id;
@@ -316,66 +356,8 @@ System.register(['lodash'], function (_export, _context) {
         return max;
       }, 0);
 
-      //************************ NODES *************************/
-      function getGroup(d, index) {
-        var group;
-        var default_index = index === 0 ? default_index1 : default_index2;
-        var selector = index === 0 ? color_data_index1 : color_data_index2;
-        var regExp = index === 0 ? color_regexp1 : color_regexp2;
+      //************************ NODES d3 *************************/
 
-        var selectorData;
-
-        if (selector !== null) selectorData = d[selector];
-
-        if (regExp) {
-          var result = regExp.exec(d[index]);
-
-          if (result.length) selectorData = result[result.length - 1];
-        }
-
-        if (selectorData) {
-          group = colorSelections[selectorData];
-          if (group === undefined) {
-            group = colorSelections[selectorData] = columns.length;
-            columns.push({
-              text: selectorData
-            });
-          }
-        } else group = default_index;
-
-        return group;
-      }
-
-      function getTotalTooltip(key) {
-        var totalObj = totals[key];
-        return "<br/> Total:" + totalObj.value + "&nbsp;&nbsp; Edge Count:" + totalObj.count;
-      }
-
-      if (!ctrl.panel.combine_active) nodesData = _.reduce(data, function (all, d) {
-
-        var value = d[d.length - 1];
-        //No value
-        if (!value || value < noise) return all;
-
-        all.push({
-          id: d[0],
-          group: getGroup(d, 0),
-          tooltip: tooltipEvals[0]({ d: d }) + getTotalTooltip(d[0])
-        }); //columns[i].text
-
-
-        all.push({
-          id: d[1],
-          group: getGroup(d, 1),
-          tooltip: tooltipEvals[1]({ d: d }) + getTotalTooltip(d[1])
-        }); //columns[i].text
-
-        return all;
-      }, []);
-
-      nodesData = _.uniqBy(nodesData, function (d) {
-        return d.id;
-      });
 
       var nodeUpdate = svg.select(".nodes").selectAll('circle').data(nodesData, function (d) {
         return d.id + '-node';
@@ -530,6 +512,40 @@ System.register(['lodash'], function (_export, _context) {
         }
         hash[key].value += value;
         hash[key].count++;
+      }
+
+      function getGroup(d, index) {
+        var group;
+        var default_index = index === 0 ? default_index1 : default_index2;
+        var selector = index === 0 ? color_data_index1 : color_data_index2;
+        var regExp = index === 0 ? color_regexp1 : color_regexp2;
+
+        var selectorData;
+
+        if (selector !== null) selectorData = d[selector];
+
+        if (regExp) {
+          var result = regExp.exec(d[index]);
+
+          if (result.length) selectorData = result[result.length - 1];
+        }
+
+        if (selectorData) {
+          group = colorSelections[selectorData];
+          if (group === undefined) {
+            group = colorSelections[selectorData] = columns.length;
+            columns.push({
+              text: selectorData
+            });
+          }
+        } else group = default_index;
+
+        return group;
+      }
+
+      function getTotalTooltip(key) {
+        var totalObj = totals[key];
+        return "<br/> Total:" + totalObj.value + "&nbsp;&nbsp; Edge Count:" + totalObj.count;
       }
     }
 
