@@ -387,9 +387,11 @@ System.register(['lodash'], function (_export, _context) {
         return d.group ? color(d.group) : color(0);
       });
 
+      var distance = ctrl.panel.link_distance || 20;
+
       var simulation = d3.forceSimulation().force("link", d3.forceLink().id(function (d) {
         return d.id;
-      }).strength(function (d) {
+      }).distance(distance).strength(function (d) {
 
         if (!d.value) return 0.01;
 

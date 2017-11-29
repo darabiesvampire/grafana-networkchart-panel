@@ -26,6 +26,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       dynamic_thickness : true,
       link_thickness : 1,
 
+      link_distance: 20,
 
       hide_internal_relationships: false,
       

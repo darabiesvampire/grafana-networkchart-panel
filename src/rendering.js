@@ -445,9 +445,12 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
 
+    var distance = ctrl.panel.link_distance || 20;
+
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink()
         .id(d => d.id) 
+        .distance(distance)
         .strength(d => { 
 
         if(!d.value)

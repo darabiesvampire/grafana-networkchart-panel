@@ -90,6 +90,8 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             dynamic_thickness: true,
             link_thickness: 1,
 
+            link_distance: 20,
+
             hide_internal_relationships: false,
 
             remove_noise: false,
