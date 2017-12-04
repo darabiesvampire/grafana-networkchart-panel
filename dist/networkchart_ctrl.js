@@ -65,13 +65,14 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
       _export('NetworkChartCtrl', NetworkChartCtrl = function (_MetricsPanelCtrl) {
         _inherits(NetworkChartCtrl, _MetricsPanelCtrl);
 
-        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate) {
+        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate, $sanitize) {
           _classCallCheck(this, NetworkChartCtrl);
 
           var _this = _possibleConstructorReturn(this, (NetworkChartCtrl.__proto__ || Object.getPrototypeOf(NetworkChartCtrl)).call(this, $scope, $injector));
 
           _this.$rootScope = $rootScope;
           _this.$interpolate = $interpolate;
+          _this.$sanitize = $sanitize;
 
           var panelDefaults = {
             color_scale: "schemeCategory10",

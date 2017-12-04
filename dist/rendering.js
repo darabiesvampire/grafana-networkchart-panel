@@ -69,7 +69,7 @@ System.register(['lodash'], function (_export, _context) {
 
     function parseTooltip(tooltip, columnTexts) {
       var regExp = /{{(.*?)}}/g;
-      var tooltipEval = tooltip;
+      var tooltipEval = ctrl.$sanitize(tooltip);
       var match;
       do {
         match = regExp.exec(tooltip);
