@@ -156,7 +156,7 @@ export default function link(scope, elem, attrs, ctrl) {
       columns.push(ctrl.columns[1])
     }
     else if(selector === 'regular expression')
-      color_regexp2 = new RegExp(ctrl.panel.first_color_regexp);
+      color_regexp2 = new RegExp(ctrl.panel.second_color_regexp);
     else
       color_data_index2 =  columnTexts.indexOf(selector);
 

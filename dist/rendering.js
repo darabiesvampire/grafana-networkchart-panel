@@ -141,7 +141,7 @@ System.register(['lodash'], function (_export, _context) {
       if (selector === 'index') {
         default_index2 = columns.length;
         columns.push(ctrl.columns[1]);
-      } else if (selector === 'regular expression') color_regexp2 = new RegExp(ctrl.panel.first_color_regexp);else color_data_index2 = columnTexts.indexOf(selector);
+      } else if (selector === 'regular expression') color_regexp2 = new RegExp(ctrl.panel.second_color_regexp);else color_data_index2 = columnTexts.indexOf(selector);
 
       //************************ Tooltips *************************/
 
