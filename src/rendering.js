@@ -141,8 +141,11 @@ export default function link(scope, elem, attrs, ctrl) {
 
     var selector = ctrl.panel.first_color_selector;
     if(selector === 'index'){
-      default_index1= columns.length; 
-      columns.push(ctrl.columns[0])
+      if(!ctrl.panel.combine_active || combineFieldIndex(columnTexts) === 0)
+      { 
+        default_index1= columns.length; 
+        columns.push(ctrl.columns[0])  
+      }  
     }
     else if(selector === 'regular expression')
       color_regexp1 = new RegExp(ctrl.panel.first_color_regexp);
@@ -152,8 +155,11 @@ export default function link(scope, elem, attrs, ctrl) {
 
     selector = ctrl.panel.second_color_selector;
     if(selector === 'index'){
-      default_index2= columns.length;
-      columns.push(ctrl.columns[1])
+      if(!ctrl.panel.combine_active || combineFieldIndex(columnTexts) === 1)
+      { 
+        default_index2= columns.length;
+        columns.push(ctrl.columns[1])
+      }
     }
     else if(selector === 'regular expression')
       color_regexp2 = new RegExp(ctrl.panel.second_color_regexp);
