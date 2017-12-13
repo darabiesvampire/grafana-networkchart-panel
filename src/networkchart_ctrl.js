@@ -23,6 +23,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
 
       dynamic_radius : false,
       node_radius : 5,
+      square_side_length: 10,
 
       dynamic_thickness : true,
       link_thickness : 1,

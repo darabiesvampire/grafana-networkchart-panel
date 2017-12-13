@@ -16,6 +16,14 @@
 			ng-change="ctrl.render()">
 		</div>
 
+		<div class="gf-form">
+			<span class="gf-form-label width-10">Square Side Length</span>
+			<input type="number" class="gf-form-input max-width-12" 
+			ng-model="ctrl.panel.square_side_length" 
+			ng-model-options="{debounce: 100}" 
+			ng-change="ctrl.render()">
+		</div>
+
 
 		<div class="gf-form">
 			<span class="gf-form-label width-10">Color Scale</span>
@@ -44,7 +52,7 @@
 			ng-model="ctrl.panel.nodes_noise" 
 			ng-model-options="{debounce: 100}" 
 			ng-change="ctrl.render()">
-			<info-popover mode="right-absolute">Show only the nodes (and their related nodes/edges) that are more than the Node noise canceling.</info-popover>
+			<info-popover mode="right-absolute">Show only the nodes (and their related nodes/edges) that are more than the Node's Total noise canceling.</info-popover>
 		</div>
 
 
@@ -97,7 +105,7 @@
 			ng-model-options="{debounce: 500}" 
 			ng-change="ctrl.render()">
 
-			<info-popover mode="right-absolute">The dynamic tooltip to show when hovered.
+			<info-popover mode="right-absolute">The dynamic tooltip to show when hovered. Use the terms from the metrics with double braces to include: <span ng-non-bindable> {{ term }}</span>
 			</info-popover>
 		</div>
 
@@ -149,9 +157,10 @@
 			ng-model-options="{debounce: 500}" 
 			ng-change="ctrl.render()">
 
-			<info-popover mode="right-absolute">The dynamic tooltip to show when hovered.
+			<info-popover mode="right-absolute">The dynamic tooltip to show when hovered. Use the terms from the metrics with double braces to include: <span ng-non-bindable> {{ term }}</span>
 			</info-popover>
 		</div>
+
 	</div>
 
 

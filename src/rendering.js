@@ -3,7 +3,7 @@ import _ from 'lodash';
 //import {event as currentEvent} from './d3-selection';
 
 export default function link(scope, elem, attrs, ctrl) {
-  var data,columns, panel, svgWrapper, highlight_text ;
+  var data,panel, svgWrapper, highlight_text ;
   var tooltipEle = elem.find('.tooltip');
   var captionEle = elem.find('.caption');
 
@@ -66,6 +66,10 @@ export default function link(scope, elem, attrs, ctrl) {
     return y(d,i) + 5
   }
 
+  function y_minus_5(d,i){
+    return y(d,i) - 5
+  }
+
 
   var tooltipEvals = [];
 
@@ -88,21 +92,21 @@ export default function link(scope, elem, attrs, ctrl) {
 
   function createTooltipEvals(columnTexts){
 
-    var firstTooltip = ctrl.panel.first_term_tooltip;
+    var firstTooltip = panel.first_term_tooltip;
 
     var tooltipEvalText1 = firstTooltip && columnTexts && columnTexts.length? parseTooltip(firstTooltip,columnTexts) : "{{d[0]}}";
     tooltipEvals[0] = ctrl.$interpolate(tooltipEvalText1);
 
 
-    var secondTooltip = ctrl.panel.second_term_tooltip;
+    var secondTooltip = panel.second_term_tooltip;
 
     var tooltipEvalText2 =secondTooltip && columnTexts && columnTexts.length? parseTooltip(secondTooltip,columnTexts) : "{{d[1]}}";
     tooltipEvals[1] = ctrl.$interpolate(tooltipEvalText2);
   }
 
   function combineFieldIndex(columnTexts){
-    if(ctrl.panel.combine_to_show){
-      var showWhichIndex  = columnTexts.indexOf(ctrl.panel.combine_to_show);
+    if(panel.combine_to_show){
+      var showWhichIndex  = columnTexts.indexOf(panel.combine_to_show);
 
       if(showWhichIndex !== -1)
         return showWhichIndex;
@@ -119,11 +123,11 @@ export default function link(scope, elem, attrs, ctrl) {
     var width = elem.width();
     var height = elem.height();
 
-    var color = d3.scaleOrdinal(d3[ctrl.panel.color_scale]);
+    var color = d3.scaleOrdinal(d3[panel.color_scale]);
 
 
-    var noise = ctrl.panel.remove_noise ? ctrl.panel.noise : 3;
-    var nodes_noise = ctrl.panel.nodes_remove_noise ? ctrl.panel.nodes_noise : 0; 
+    var noise = panel.remove_noise ? panel.noise : 3;
+    var nodes_noise = panel.nodes_remove_noise ? panel.nodes_noise : 0; 
     
     //************************ Init Caption and Colors Data *************************/
     var colorSelections = {};
@@ -139,30 +143,34 @@ export default function link(scope, elem, attrs, ctrl) {
     var color_data_index2 = null;
 
 
-    var selector = ctrl.panel.first_color_selector;
+    var selector = panel.first_color_selector;
     if(selector === 'index'){
-      if(!ctrl.panel.combine_active || combineFieldIndex(columnTexts) === 0)
+      if(!panel.combine_active || combineFieldIndex(columnTexts) === 0)
       { 
         default_index1= columns.length; 
+        
+        ctrl.columns[0].group = 0;
         columns.push(ctrl.columns[0])  
       }  
     }
     else if(selector === 'regular expression')
-      color_regexp1 = new RegExp(ctrl.panel.first_color_regexp);
+      color_regexp1 = new RegExp(panel.first_color_regexp);
     else
       color_data_index1 =  columnTexts.indexOf(selector); 
 
 
-    selector = ctrl.panel.second_color_selector;
+    selector = panel.second_color_selector;
     if(selector === 'index'){
-      if(!ctrl.panel.combine_active || combineFieldIndex(columnTexts) === 1)
+      if(!panel.combine_active || combineFieldIndex(columnTexts) === 1)
       { 
         default_index2= columns.length;
+
+        ctrl.columns[1].group = 1;
         columns.push(ctrl.columns[1])
       }
     }
     else if(selector === 'regular expression')
-      color_regexp2 = new RegExp(ctrl.panel.second_color_regexp);
+      color_regexp2 = new RegExp(panel.second_color_regexp);
     else
       color_data_index2 =  columnTexts.indexOf(selector);
 
@@ -206,8 +214,9 @@ export default function link(scope, elem, attrs, ctrl) {
     var totals = {};
     var linkData = [];
     var nodesData = [];
+    var nodesData2 = []; //Second group nodes
 
-    if(ctrl.panel.combine_active){
+    if(panel.combine_active){
       var sourceIndex =combineFieldIndex(columnTexts);
       var targetIndex = +!sourceIndex ;
 
@@ -236,7 +245,7 @@ export default function link(scope, elem, attrs, ctrl) {
           allSources[source].group = getGroup(d,sourceIndex);  
       });
 
-      var combineMethod = _[ctrl.panel.combine_method];
+      var combineMethod = _[panel.combine_method];
 
       var relations = {};
 
@@ -254,7 +263,7 @@ export default function link(scope, elem, attrs, ctrl) {
             //Already calculated at the other end
             if(relations[sourceFromTarget]) continue;
 
-            if(ctrl.panel.hide_internal_relationships && allSources[source].group === allSources[sourceFromTarget].group )
+            if(panel.hide_internal_relationships && allSources[source].group === allSources[sourceFromTarget].group )
                 continue;
 
             if(!currentRel[sourceFromTarget]) currentRel[sourceFromTarget] = 0;
@@ -355,7 +364,7 @@ export default function link(scope, elem, attrs, ctrl) {
             tooltip: tooltipEvals[0]({d: d}) + getTotalTooltip(firstNode)
           }); //columns[i].text
         
-        nodesData.push({
+        nodesData2.push({
             id: secondNode, 
             group: getGroup(d, 1),
             tooltip: tooltipEvals[1]({d: d}) + getTotalTooltip(secondNode)
@@ -366,6 +375,7 @@ export default function link(scope, elem, attrs, ctrl) {
     }
 
     nodesData = _.uniqBy(nodesData, d => d.id);
+    nodesData2 = _.uniqBy(nodesData2, d => d.id);
 
 
     //************************ Links d3 *************************/
@@ -392,9 +402,9 @@ export default function link(scope, elem, attrs, ctrl) {
       .text(d => d.id)
     */
 
-    var link_thickness = ctrl.panel.link_thickness;
+    var link_thickness = panel.link_thickness;
 
-    if(ctrl.panel.dynamic_thickness)
+    if(panel.dynamic_thickness)
       link_thickness = d => Math.log(d.value)
 
     // ENTER + UPDATE
@@ -414,18 +424,21 @@ export default function link(scope, elem, attrs, ctrl) {
 
     //************************ NODES d3 *************************/
 
+    //************************ Circles d3 *************************/
 
-    var nodeUpdate = svg.select(".nodes")
+    var radius = panel.node_radius
+
+    var circleUpdate = svg.select(".nodes")
                     .selectAll('circle')
                     .data(nodesData, d => d.id + '-node');
 
     // EXIT
     // Remove old elements as needed.
-    nodeUpdate.exit().remove();
+    circleUpdate.exit().remove();
 
     // ENTER
     // Create new elements as needed.  
-    var nodeEnter = nodeUpdate.enter().append("circle")
+    var circleEnter = circleUpdate.enter().append("circle")
               .on("mouseover", showTooltip)
               .on("mouseout", hideTooltip)
               .call(d3.drag()
@@ -435,23 +448,54 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     /*                    
-    nodeEnter   
+    circleEnter   
         .append("title")
         .text(d => d.id);
     */
 
-    var radius = ctrl.panel.node_radius
-
 
     // ENTER + UPDATE
-    nodeUpdate = nodeUpdate.merge(nodeEnter)
+    circleUpdate = circleUpdate.merge(circleEnter)
       //.selectAll("circle")
       .attr("r", radius) // TODO use cummulative value for this
       .attr("fill", d => d.group ? color(d.group) : color(0) )
 
 
+    //************************ Rectangles d3 *************************/
 
-    var distance = ctrl.panel.link_distance || 20;
+
+    var squareSide = panel.square_side_length;
+
+    var rectUpdate = svg.select(".nodes")
+                    .selectAll('rect')
+                    .data(nodesData2, d => d.id + '-node');
+
+    // EXIT
+    // Remove old elements as needed.
+    rectUpdate.exit().remove();
+
+    // ENTER
+    // Create new elements as needed.  
+    var rectEnter = rectUpdate.enter().append("rect")
+              .on("mouseover", showTooltip)
+              .on("mouseout", hideTooltip)
+              .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+
+    // ENTER + UPDATE
+    rectUpdate = rectUpdate.merge(rectEnter)
+      .attr("x", -squareSide/2)
+      .attr("y", -squareSide/2)
+      .attr("width", squareSide)
+      .attr("height", squareSide)
+      .attr("fill", d => d.group ? color(d.group) : color(0) )
+
+
+
+    var distance = panel.link_distance || 20;
 
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink()
@@ -473,7 +517,7 @@ export default function link(scope, elem, attrs, ctrl) {
       .force("center", d3.forceCenter(width / 2, height / 2));
 
     simulation
-      .nodes(nodesData)
+      .nodes(nodesData.concat(nodesData2))
       .on("tick", ticked);
 
     simulation.force("link")
@@ -483,7 +527,24 @@ export default function link(scope, elem, attrs, ctrl) {
     //************************ Add Caption Colors *************************/
     var captions = d3.select(captionEle[0]);
 
-    var columnsSorted = _.sortBy(columns,"text")
+    /*
+    var columnsSorted = columns;
+    var secondColumsSorted;
+
+    if(!panel.combine_active)
+    {
+      columnsSorted = _.filter(columns, ['group', 0 ]);
+      secondColumsSorted = _.filter(columns, 'group');
+    }
+
+    columnsSorted = _.sortBy(columnsSorted,"text")
+
+    if(secondColumsSorted)
+      secondColumsSorted = _.sortBy(secondColumsSorted,"text")
+
+    */
+
+    var columnsSorted = _.sortBy(columns, [ "group" , "text"]);
     
     var captionsUpdate = captions.selectAll("g")
                         .data(columnsSorted, (d,i) => d.text+i);
@@ -497,34 +558,54 @@ export default function link(scope, elem, attrs, ctrl) {
     var captionsEnter = captionsUpdate.enter()
                         .append("g");
 
-
-    captionsEnter
-      .append("circle")
-      .attr("r", 10)
-      .attr("cx", 15)
-      .attr("cy", y)
-
-
     captionsEnter
       .append("text")
       .attr("class", "captions-text" + theme)
       .attr("x", 25)
       .attr("y", y_plus_5);
 
-    
-    var colorTexts = _.map(columns,"text")
 
-    // ENTER + UPDATE
-    captionsUpdate.merge(captionsEnter)
-      .selectAll('circle')
-      //.attr("fill", (d,i) => color(i)  )
-      .attr("fill", d => color( colorTexts.indexOf(d.text))  )
+    var captionsMerged = captionsUpdate.merge(captionsEnter);
 
-
-
-    captionsUpdate.merge(captionsEnter)
+    captionsMerged
       .selectAll('text')
       .text(d => d.text);
+
+
+    if(panel.combine_active)    
+        captionsMerged.append("circle")
+    else
+    {
+      
+      captionsMerged
+        .append(function(d){
+          var ele = d.group === 0 ? "circle" : "rect"; 
+          return d3.creator(ele).apply(this)
+        })
+    }
+    
+
+
+    var colorTexts = _.map(columns,"text")
+    var columnsSortedTexts = _.map(columnsSorted,"text")
+
+
+    // ENTER + UPDATE
+    captionsMerged
+      .selectAll('circle')
+        .attr("r", 7)
+        .attr("cx", 15)
+        .attr("cy", d => 25 * (columnsSortedTexts.indexOf(d.text)+1) )
+        .attr("fill", d => color( colorTexts.indexOf(d.text))  )
+
+
+    captionsMerged
+      .selectAll('rect')
+      .attr("x", 10 )
+      .attr("y", d => 25 * (columnsSortedTexts.indexOf(d.text)+1) - 5 )
+      .attr("width", 10 )
+      .attr("height", 10)
+      .attr("fill", d => color( colorTexts.indexOf(d.text))  )
 
 
 
@@ -539,9 +620,7 @@ export default function link(scope, elem, attrs, ctrl) {
       //stop simiulation
       simulation.alphaTarget(0);
 
-      var cx,cy;
-
-      nodeUpdate
+      circleUpdate
         .transition()
         .duration(1000)  
         .delay(2000) 
@@ -553,14 +632,31 @@ export default function link(scope, elem, attrs, ctrl) {
         .delay(1000) 
         .attr("r", radius)
 
-
+      rectUpdate
+        .transition()
+        .duration(1000)  
+        .delay(2000) 
+        .attr("width", d => checkHighlight(d) ? squareSide*7 : squareSide)
+        .attr("height", d => checkHighlight(d) ? squareSide*7 : squareSide)
+        .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
+        .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
+        .transition()
+        .duration(1000)  
+        .delay(1000) 
+        .attr("width", squareSide)
+        .attr("height", squareSide)
 
     }
     else if(ctrl.prev_highlight_text)
     {
-      nodeUpdate
+      circleUpdate
       .attr("stroke", "")
       .attr("stroke-width", "")
+
+      rectUpdate
+      .attr("stroke", "")
+      .attr("stroke-width", "")
+
     }
 
 
@@ -572,9 +668,18 @@ export default function link(scope, elem, attrs, ctrl) {
           .attr("x2", function(d) { return d.target.x; })
           .attr("y2", function(d) { return d.target.y; });
 
-      nodeUpdate
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; });
+
+      function transformXY(d) {
+        return "translate(" + d.x + "," + d.y + ")"
+      }    
+
+
+      //circleUpdate.attr("transform", transformXY);
+      circleUpdate
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+
+      rectUpdate.attr("transform", transformXY);
     }
 
     function dragstarted(d) {
@@ -638,7 +743,8 @@ export default function link(scope, elem, attrs, ctrl) {
         {
           group = colorSelections[selectorData] = columns.length;
           columns.push({
-            text: selectorData
+            text: selectorData,
+            group: index
           });
         }
       }
@@ -660,7 +766,6 @@ export default function link(scope, elem, attrs, ctrl) {
 
   function render() {
     data = ctrl.data;
-    columns = ctrl.columns;
     panel = ctrl.panel;
 
     if (setElementHeight())
