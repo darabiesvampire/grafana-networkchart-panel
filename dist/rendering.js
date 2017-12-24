@@ -388,7 +388,7 @@ System.register(['lodash'], function (_export, _context) {
 
       // ENTER
       // Create new elements as needed.  
-      var circleEnter = circleUpdate.enter().append("circle").on("mouseover", showTooltip).on("mouseout", hideTooltip).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+      var circleEnter = circleUpdate.enter().append("circle").on("mouseover", showTooltip).on("mouseout", hideTooltip).on("click", clicked).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
 
       /*                    
       circleEnter   
@@ -419,7 +419,7 @@ System.register(['lodash'], function (_export, _context) {
 
       // ENTER
       // Create new elements as needed.  
-      var rectEnter = rectUpdate.enter().append("rect").on("mouseover", showTooltip).on("mouseout", hideTooltip).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+      var rectEnter = rectUpdate.enter().append("rect").on("mouseover", showTooltip).on("mouseout", hideTooltip).on("click", clicked).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
 
       // ENTER + UPDATE
       rectUpdate = rectUpdate.merge(rectEnter).attr("x", -squareSide / 2).attr("y", -squareSide / 2).attr("width", squareSide).attr("height", squareSide).attr("fill", function (d) {
@@ -574,6 +574,21 @@ System.register(['lodash'], function (_export, _context) {
       function dragged(d) {
         d.fx = d3.event.x;
         d.fy = d3.event.y;
+      }
+
+      function clicked(d, i) {
+        if (!d3.event || !d3.event.shiftKey) return;
+
+        var field;
+        if (panel.combine_active) {
+          field = panel.combine_to_show;
+        } else {
+          var index = this.nodeName === "circle" ? 0 : 1;
+
+          var field = columnTexts[index];
+        }
+
+        console.log(field, d.id);
       }
 
       function dragended(d) {
