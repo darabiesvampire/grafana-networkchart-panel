@@ -10,6 +10,12 @@ module.exports = function(grunt) {
     clean: ["dist"],
 
     copy: {
+      vendor: {
+        expand: true,
+        flatten: true,
+        src: ['node_modules/d3/build/d3.min.js', 'node_modules/d3-scale-chromatic/build/d3-scale-chromatic.min.js'],
+        dest: 'dist/vendor'
+      },
       src_to_dist: {
         cwd: 'src',
         expand: true,
@@ -56,5 +62,5 @@ module.exports = function(grunt) {
 
   });
 
-  grunt.registerTask('default', ['clean', 'copy:src_to_dist', 'copy:img_to_dist', 'copy:pluginDef', 'babel']);
+  grunt.registerTask('default', ['clean', 'copy:vendor', 'copy:src_to_dist', 'copy:img_to_dist', 'copy:pluginDef', 'babel']);
 };

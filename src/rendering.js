@@ -711,6 +711,7 @@ export default function link(scope, elem, attrs, ctrl) {
 
       console.log(field, d.id);
 
+      d3.event.stopPropagation();
     }
 
     function dragended(d) {

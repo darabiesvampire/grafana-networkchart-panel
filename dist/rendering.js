@@ -589,6 +589,8 @@ System.register(['lodash'], function (_export, _context) {
         }
 
         console.log(field, d.id);
+
+        d3.event.stopPropagation();
       }
 
       function dragended(d) {
