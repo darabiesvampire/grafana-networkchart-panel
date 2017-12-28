@@ -460,6 +460,8 @@ System.register(['lodash'], function (_export, _context) {
         secondColumsSorted = _.sortBy(secondColumsSorted,"text")
        */
 
+      captions.attr("height", y(null, columns.length));
+
       var columnsSorted = _.sortBy(columns, ["group", "text"]);
 
       var captionsUpdate = captions.selectAll("g").data(columnsSorted, function (d, i) {

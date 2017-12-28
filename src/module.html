@@ -27,10 +27,19 @@
 	    color: black;
 	}
 
-	.caption {
+
+
+	.caption-holder {
 		position: absolute;
 		width: 200px;
 		height:  95%;
+		overflow: auto;
+	}
+
+	
+	.caption {
+		position: absolute;
+		width: 200px;
 		border: 1px solid;
 	    border-radius: 15px;
 	}
@@ -78,7 +87,9 @@
 <div class="graph-wrapper">
 	<div class="tooltip"></div>
 
-	<svg class="caption" ></svg>
+	<div class="caption-holder">
+		<svg class="caption" ></svg>
+	</div>	
 
 	<div class="next-to-captions gf-form">
 

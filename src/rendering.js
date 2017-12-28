@@ -546,6 +546,8 @@ export default function link(scope, elem, attrs, ctrl) {
 
     */
 
+    captions.attr("height", y(null,columns.length));
+
     var columnsSorted = _.sortBy(columns, [ "group" , "text"]);
     
     var captionsUpdate = captions.selectAll("g")
