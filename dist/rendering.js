@@ -1,11 +1,19 @@
 'use strict';
 
-System.register(['lodash'], function (_export, _context) {
+System.register(['lodash', 'app/core/app_events'], function (_export, _context) {
   "use strict";
 
-  var _;
+  var _, appEvents;
 
   function link(scope, elem, attrs, ctrl) {
+
+    function emit(field, value) {
+      appEvents.emit('add-selection', {
+        field: field,
+        value: value
+      });
+    }
+
     var data, panel, svgWrapper, highlight_text;
     var tooltipEle = elem.find('.tooltip');
     var captionEle = elem.find('.caption');
@@ -590,7 +598,7 @@ System.register(['lodash'], function (_export, _context) {
           var field = columnTexts[index];
         }
 
-        console.log(field, d.id);
+        emit(field, d.id);
 
         d3.event.stopPropagation();
       }
@@ -679,6 +687,8 @@ System.register(['lodash'], function (_export, _context) {
   return {
     setters: [function (_lodash) {
       _ = _lodash.default;
+    }, function (_appCoreApp_events) {
+      appEvents = _appCoreApp_events.default;
     }],
     execute: function () {}
   };

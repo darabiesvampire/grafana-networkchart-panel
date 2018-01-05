@@ -1,8 +1,19 @@
 import _ from 'lodash';
+import appEvents from 'app/core/app_events';
 //import * as d3 from 'd3';
 //import {event as currentEvent} from './d3-selection';
 
 export default function link(scope, elem, attrs, ctrl) {
+
+  function emit(field, value) {
+    appEvents.emit('add-selection', {
+      field: field,
+      value: value
+    });
+  }
+
+
+
   var data,panel, svgWrapper, highlight_text ;
   var tooltipEle = elem.find('.tooltip');
   var captionEle = elem.find('.caption');
@@ -711,7 +722,7 @@ export default function link(scope, elem, attrs, ctrl) {
         var field = columnTexts[index];
       }
 
-      console.log(field, d.id);
+      emit(field, d.id);
 
       d3.event.stopPropagation();
     }
