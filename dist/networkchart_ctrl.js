@@ -100,7 +100,10 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             noise: 100,
 
             nodes_remove_noise: false,
-            nodes_noise: 1000
+            nodes_noise: 1000,
+
+            first_filter_minumum_number_of_links: 0,
+            second_filter_minumum_number_of_links: 0
 
           };
 

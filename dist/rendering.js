@@ -130,6 +130,9 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
       var noise = panel.remove_noise ? panel.noise : 3;
       var nodes_noise = panel.nodes_remove_noise ? panel.nodes_noise : 0;
 
+      var filter_first_link_numbers = panel.first_filter_minumum_number_of_links ? panel.first_filter_minumum_number_of_links : 0;
+      var filter_second_link_numbers = panel.second_filter_minumum_number_of_links ? panel.second_filter_minumum_number_of_links : 0;
+
       //************************ Init Caption and Colors Data *************************/
       var colorSelections = {};
       var columns = [];
@@ -194,7 +197,7 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
 
       if (panel.combine_active) {
         var sourceIndex = combineFieldIndex(columnTexts);
-        var targetIndex = +!sourceIndex;
+        var targetIndex = +!sourceIndex; // 0 -> 1     1,2,... => 0
 
         var allSources = {};
         var allTargets = {};
@@ -310,6 +313,11 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
             var addSecond = totals[secondNode].value > nodes_noise;
 
             if (!addFirst && !addSecond) return;
+          }
+
+          //Should I decrement the second link number count when first is omited or vice versa
+          if (totals[firstNode].count < filter_first_link_numbers || totals[secondNode].count < filter_second_link_numbers) {
+            return;
           }
 
           linkData.push({
