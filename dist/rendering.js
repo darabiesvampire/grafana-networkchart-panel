@@ -195,12 +195,15 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
       var nodesData = [];
       var nodesData2 = []; //Second group nodes
 
+      var doWeFilterOnEdgeCounts = filter_first_link_numbers || filter_second_link_numbers;
+
       if (panel.combine_active) {
         var sourceIndex = combineFieldIndex(columnTexts);
         var targetIndex = +!sourceIndex; // 0 -> 1     1,2,... => 0
 
         var allSources = {};
         var allTargets = {};
+        var totalsFilterHash = {};
 
         _.forEach(data, function (d) {
 
@@ -220,6 +223,11 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
           allSources[source].tooltip = tooltipEvals[sourceIndex]({ d: d });
 
           if (color_data_index1 !== null || color_regexp1) allSources[source].group = getGroup(d, sourceIndex);
+
+          if (doWeFilterOnEdgeCounts) {
+            setTotalsHash(totalsFilterHash, source, value);
+            setTotalsHash(totalsFilterHash, target, value);
+          }
         });
 
         var combineMethod = _[panel.combine_method];
@@ -232,6 +240,11 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
           var currentRel = relations[source];
 
           for (var target in allSources[source]) {
+            if (target === 'group' || target === 'tooltip') continue;
+
+            if (doWeFilterOnEdgeCounts && (totalsFilterHash[source].count < filter_first_link_numbers || totalsFilterHash[target].count < filter_second_link_numbers)) {
+              continue;
+            }
 
             var value = allSources[source][target];
 
