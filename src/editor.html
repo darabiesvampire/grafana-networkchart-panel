@@ -48,7 +48,7 @@
 
 		<div class="gf-form" ng-if="ctrl.panel.nodes_remove_noise">
 			<span class="gf-form-label width-10">Noise Threshold</span>
-			<input type="number" class="gf-form-input max-width-10" 
+			<input type="text" class="gf-form-input max-width-10"
 			ng-model="ctrl.panel.nodes_noise" 
 			ng-model-options="{debounce: 100}" 
 			ng-change="ctrl.render()">
@@ -239,7 +239,7 @@
 
 		<div class="gf-form" ng-if="ctrl.panel.remove_noise">
 			<span class="gf-form-label width-10">Noise Threshold</span>
-			<input type="number" class="gf-form-input max-width-10" 
+			<input type="text" class="gf-form-input max-width-10"
 			ng-model="ctrl.panel.noise" 
 			ng-model-options="{debounce: 250}" 
 			ng-change="ctrl.render()">

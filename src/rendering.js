@@ -138,7 +138,32 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     var noise = panel.remove_noise ? panel.noise : 3;
-    var nodes_noise = panel.nodes_remove_noise ? panel.nodes_noise : 0; 
+    var nodes_noise = panel.nodes_remove_noise ? panel.nodes_noise : 0;
+
+    var noiseMin = 0;
+    var noiseMax = 0;
+    var isNoiseRange = false;
+
+    var noiseArray = noise.toString().split('-');
+    if (noiseArray.length === 2) {
+      isNoiseRange = true;
+      noiseMin = noiseArray[0];
+      noiseMax = noiseArray[1];
+    }
+
+    var nodeNoiseMin = 0;
+    var nodeNoiseMax = 0;
+    var isNodeNoiseRange = false;
+
+    if (nodes_noise) {
+      var edgeNoiseArray = nodes_noise.toString().split('-');
+      if (edgeNoiseArray.length === 2) {
+        isNodeNoiseRange = true;
+        nodeNoiseMin = edgeNoiseArray[0];
+        nodeNoiseMax = edgeNoiseArray[1];
+      }
+    }
+
 
     var filter_first_link_numbers = panel.first_filter_minumum_number_of_links ? panel.first_filter_minumum_number_of_links : 0;  
     var filter_second_link_numbers = panel.second_filter_minumum_number_of_links ? panel.second_filter_minumum_number_of_links : 0;
@@ -245,8 +270,16 @@ export default function link(scope, elem, attrs, ctrl) {
 
         var value = d[d.length-1];
         //No value
-        if(!value || value < noise)
-          return ;
+        if (!isNoiseRange) {
+          if (!value || value < noise) {
+            return;
+          }
+        }
+        if(isNoiseRange) {
+          if (!value || value < noiseMin || value > noiseMax) {
+            return;
+          }
+        }
 
         var source = d[sourceIndex];
         var target = d[targetIndex];
@@ -328,7 +361,12 @@ export default function link(scope, elem, attrs, ctrl) {
       for (var relation1 in relations) {
         for (var relation2 in relations[relation1]) {
           var addFirst = totals[relation1].value > nodes_noise;
+          if(isNodeNoiseRange)
+            addFirst = totals[relation1].value > nodeNoiseMin && totals[relation1].value < nodeNoiseMax;
+
           var addSecond = totals[relation2].value > nodes_noise;
+          if(isNodeNoiseRange)
+            addSecond = totals[relation2].value > nodeNoiseMin && totals[relation2].value < nodeNoiseMax;
 
           if(!addFirst && !addSecond)
             continue;
@@ -365,8 +403,16 @@ export default function link(scope, elem, attrs, ctrl) {
       _.forEach(data, d => {
         var value = d[d.length-1];
 
-        if(!value || value < noise)
-          return;
+        if (!isNoiseRange) {
+          if (!value || value < noise) {
+            return;
+          }
+        }
+        if(isNoiseRange) {
+          if (!value || value < noiseMin || value > noiseMax) {
+            return;
+          }
+        }
         
         setTotalsHash(totals, d[0], value);
         setTotalsHash(totals, d[1], value);
@@ -376,7 +422,10 @@ export default function link(scope, elem, attrs, ctrl) {
       _.forEach(data, d => {
         var value = d[d.length-1];
 
-        if(!value || value < noise)
+        if(!isNoiseRange && !value || value < noise)
+          return;
+
+        if(isNoiseRange && !value || value < noiseMin || value > noiseMax)
           return;
 
 
@@ -384,8 +433,15 @@ export default function link(scope, elem, attrs, ctrl) {
         var  secondNode = d[1];
 
         if(nodes_noise){
-          var addFirst  = totals[firstNode].value > nodes_noise;
+          var addFirst = totals[firstNode].value > nodes_noise;
+          if(isNodeNoiseRange)
+            addFirst = totals[firstNode].value > nodeNoiseMin && totals[firstNode].value < nodeNoiseMax;
+
           var addSecond = totals[secondNode].value > nodes_noise;
+          if(isNodeNoiseRange)
+            addSecond = totals[secondNode].value > nodeNoiseMin && totals[secondNode].value < nodeNoiseMax;
+
+
           
           if(!addFirst && !addSecond)
             return;
