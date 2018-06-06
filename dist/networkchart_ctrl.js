@@ -97,10 +97,10 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             hide_internal_relationships: false,
 
             remove_noise: false,
-            noise: 100,
+            noise: 20,
 
             nodes_remove_noise: false,
-            nodes_noise: 1000,
+            nodes_noise: 100,
 
             first_filter_minumum_number_of_links: 0,
             second_filter_minumum_number_of_links: 0
