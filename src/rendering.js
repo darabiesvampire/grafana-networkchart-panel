@@ -62,10 +62,10 @@ export default function link(scope, elem, attrs, ctrl) {
     svg.call(d3.zoom().on('zoom', function() {
 
       var scale = d3.event.transform.k,
-      translate = [d3.event.transform.x, d3.event.transform.y];
+        translate = [d3.event.transform.x, d3.event.transform.y];
 
-       svgWrapper.attr('transform', 'translate(' + translate[0] + ', ' + translate[1] + ') scale(' + scale + ')');
-   }));
+      svgWrapper.attr('transform', 'translate(' + translate[0] + ', ' + translate[1] + ') scale(' + scale + ')');
+    }));
   }
 
 
@@ -85,20 +85,20 @@ export default function link(scope, elem, attrs, ctrl) {
   var tooltipEvals = [];
 
   function parseTooltip(tooltip,columnTexts){
-      var regExp=/{{(.*?)}}/g;    
-      var tooltipEval = ctrl.$sanitize(tooltip);
-      var match;
-      do {
-          match = regExp.exec(tooltip);
-          if (match){
-            var index = columnTexts.indexOf(match[1]);
-            var replaceWith = index!== -1 ? `d[${index}]` : "";
+    var regExp=/{{(.*?)}}/g;
+    var tooltipEval = ctrl.$sanitize(tooltip);
+    var match;
+    do {
+      match = regExp.exec(tooltip);
+      if (match){
+        var index = columnTexts.indexOf(match[1]);
+        var replaceWith = index!== -1 ? `d[${index}]` : "";
 
-            tooltipEval = tooltipEval.replace(match[1], replaceWith)
-          }
-      } while (match);
+        tooltipEval = tooltipEval.replace(match[1], replaceWith)
+      }
+    } while (match);
 
-      return tooltipEval;
+    return tooltipEval;
   }
 
   function createTooltipEvals(columnTexts){
@@ -165,7 +165,7 @@ export default function link(scope, elem, attrs, ctrl) {
     }
 
 
-    var filter_first_link_numbers = panel.first_filter_minumum_number_of_links ? panel.first_filter_minumum_number_of_links : 0;  
+    var filter_first_link_numbers = panel.first_filter_minumum_number_of_links ? panel.first_filter_minumum_number_of_links : 0;
     var filter_second_link_numbers = panel.second_filter_minumum_number_of_links ? panel.second_filter_minumum_number_of_links : 0;
 
     //************************ Init Caption and Colors Data *************************/
@@ -176,7 +176,7 @@ export default function link(scope, elem, attrs, ctrl) {
     var default_index1;
     var color_regexp1;
     var color_data_index1 = null;
-    
+
     var default_index2;
     var color_regexp2;
     var color_data_index2 = null;
@@ -185,23 +185,23 @@ export default function link(scope, elem, attrs, ctrl) {
     var selector = panel.first_color_selector;
     if(selector === 'index'){
       if(!panel.combine_active || combineFieldIndex(columnTexts) === 0)
-      { 
-        default_index1= columns.length; 
-        
+      {
+        default_index1= columns.length;
+
         ctrl.columns[0].group = 0;
-        columns.push(ctrl.columns[0])  
-      }  
+        columns.push(ctrl.columns[0])
+      }
     }
     else if(selector === 'regular expression')
       color_regexp1 = new RegExp(panel.first_color_regexp);
     else
-      color_data_index1 =  columnTexts.indexOf(selector); 
+      color_data_index1 =  columnTexts.indexOf(selector);
 
 
     selector = panel.second_color_selector;
     if(selector === 'index'){
       if(!panel.combine_active || combineFieldIndex(columnTexts) === 1)
-      { 
+      {
         default_index2= columns.length;
 
         ctrl.columns[1].group = 1;
@@ -219,30 +219,30 @@ export default function link(scope, elem, attrs, ctrl) {
     createTooltipEvals(columnTexts);
 
     var tooltip = d3.select(tooltipEle[0])
-                  .style("opacity", 0);
+      .style("opacity", 0);
 
 
-    function showTooltip(d) {    
+    function showTooltip(d) {
       tooltip.transition()
-          .duration(200)
-          .style("opacity", .8);
+        .duration(200)
+        .style("opacity", .8);
 
-      tooltip.html(d.tooltip)  
-          .style("width",  (d.tooltip.length * 7) + "px")
-          .style("left",  (d3.event.pageX) + "px")   
-          .style("top",   (d3.event.pageY - 28) + "px")
-      }
+      tooltip.html(d.tooltip)
+        .style("width",  (d.tooltip.length * 7) + "px")
+        .style("left",  (d3.event.pageX) + "px")
+        .style("top",   (d3.event.pageY - 28) + "px")
+    }
 
 
-      function hideTooltip(d) {
-          tooltip.transition()    
-              .duration(500)    
-              .style("opacity", 0); 
-      }
+    function hideTooltip(d) {
+      tooltip.transition()
+        .duration(500)
+        .style("opacity", 0);
+    }
 
 
     //************************ Main Graph *************************/
-  
+
     var svg = d3.select(elem[0]);
 
     addZoom(svg);
@@ -280,7 +280,6 @@ export default function link(scope, elem, attrs, ctrl) {
             return;
           }
         }
-
         var source = d[sourceIndex];
         var target = d[targetIndex];
 
@@ -293,7 +292,7 @@ export default function link(scope, elem, attrs, ctrl) {
         allSources[source].tooltip = tooltipEvals[sourceIndex]({d: d})
 
         if(color_data_index1 !== null || color_regexp1)
-          allSources[source].group = getGroup(d,sourceIndex);  
+          allSources[source].group = getGroup(d,sourceIndex);
 
 
         if(doWeFilterOnEdgeCounts)
@@ -335,7 +334,7 @@ export default function link(scope, elem, attrs, ctrl) {
             if(relations[sourceFromTarget]) continue;
 
             if(panel.hide_internal_relationships && allSources[source].group === allSources[sourceFromTarget].group )
-                continue;
+              continue;
 
             if(!currentRel[sourceFromTarget]) currentRel[sourceFromTarget] = 0;
 
@@ -371,27 +370,27 @@ export default function link(scope, elem, attrs, ctrl) {
           if(!addFirst && !addSecond)
             continue;
 
-            nodesData.push({
-              id: relation1 ,
-              group: allSources[relation1].group,
-              tooltip: allSources[relation1].tooltip + getTotalTooltip(relation1)
-            });
+          nodesData.push({
+            id: relation1 ,
+            group: allSources[relation1].group,
+            tooltip: allSources[relation1].tooltip + getTotalTooltip(relation1)
+          });
 
-            nodesData.push({
-              id: relation2 ,
-              group: allSources[relation2].group ,
-              tooltip: allSources[relation2].tooltip + getTotalTooltip(relation2)
-            });
-                      
-            var value = relations[relation1][relation2];
+          nodesData.push({
+            id: relation2 ,
+            group: allSources[relation2].group ,
+            tooltip: allSources[relation2].tooltip + getTotalTooltip(relation2)
+          });
 
-            linkData.push({
-                  id: relation1 + relation2, 
-                  source: relation1,
-                  target: relation2,
-                  value:  value,
-                  tooltip: relation1+ ' <=> ' + relation2 + '<br>' + value
-                });
+          var value = relations[relation1][relation2];
+
+          linkData.push({
+            id: relation1 + relation2,
+            source: relation1,
+            target: relation2,
+            value:  value,
+            tooltip: relation1+ ' <=> ' + relation2 + '<br>' + value
+          });
         }
       }
 
@@ -413,7 +412,7 @@ export default function link(scope, elem, attrs, ctrl) {
             return;
           }
         }
-        
+
         setTotalsHash(totals, d[0], value);
         setTotalsHash(totals, d[1], value);
       });
@@ -422,11 +421,16 @@ export default function link(scope, elem, attrs, ctrl) {
       _.forEach(data, d => {
         var value = d[d.length-1];
 
-        if(!isNoiseRange && !value || value < noise)
-          return;
-
-        if(isNoiseRange && !value || value < noiseMin || value > noiseMax)
-          return;
+        if (!isNoiseRange) {
+          if (!value || value < noise) {
+            return;
+          }
+        }
+        if(isNoiseRange) {
+          if (!value || value < noiseMin || value > noiseMax) {
+            return;
+          }
+        }
 
 
         var  firstNode = d[0];
@@ -456,27 +460,27 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
         linkData.push({
-            id: firstNode + secondNode, 
-            source: firstNode,
-            target: secondNode,
-            value:  value,
-            tooltip: firstNode + " <=> " + secondNode + " <br> " + value
-          });
+          id: firstNode + secondNode,
+          source: firstNode,
+          target: secondNode,
+          value:  value,
+          tooltip: firstNode + " <=> " + secondNode + " <br> " + value
+        });
 
         nodesData.push({
-            id: firstNode, 
-            group: getGroup(d, 0),
-            tooltip: tooltipEvals[0]({d: d}) + getTotalTooltip(firstNode)
-          }); //columns[i].text
-        
+          id: firstNode,
+          group: getGroup(d, 0),
+          tooltip: tooltipEvals[0]({d: d}) + getTotalTooltip(firstNode)
+        }); //columns[i].text
+
         nodesData2.push({
-            id: secondNode, 
-            group: getGroup(d, 1),
-            tooltip: tooltipEvals[1]({d: d}) + getTotalTooltip(secondNode)
-          }); //columns[i].text
+          id: secondNode,
+          group: getGroup(d, 1),
+          tooltip: tooltipEvals[1]({d: d}) + getTotalTooltip(secondNode)
+        }); //columns[i].text
       });
 
-    
+
     }
 
     nodesData = _.uniqBy(nodesData, d => d.id);
@@ -486,8 +490,8 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
     var linkUpdate = svg.select(".links")
-                    .selectAll("line")
-                    .data(linkData, d => d.id);
+      .selectAll("line")
+      .data(linkData, d => d.id);
 
     // EXIT
     // Remove old elements as needed.
@@ -496,9 +500,9 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER
     // Create new elements as needed.  
     var enter = linkUpdate.enter().append("line")
-                .attr("class", "line"+theme)
-                .on("mouseover", showTooltip)
-                .on("mouseout", hideTooltip)
+      .attr("class", "line"+theme)
+      .on("mouseover", showTooltip)
+      .on("mouseout", hideTooltip)
 
     /*
     enter    
@@ -513,8 +517,8 @@ export default function link(scope, elem, attrs, ctrl) {
 
     // ENTER + UPDATE
     linkUpdate =linkUpdate.merge(enter)
-                //.selectAll("line")
-                .attr("stroke-width", link_thickness );
+    //.selectAll("line")
+      .attr("stroke-width", link_thickness );
 
 
     var maxValueLogged = _.reduce(linkData, (max, d) =>{
@@ -533,8 +537,8 @@ export default function link(scope, elem, attrs, ctrl) {
     var radius = panel.node_radius
 
     var circleUpdate = svg.select(".nodes")
-                    .selectAll('circle')
-                    .data(nodesData, d => d.id + '-node');
+      .selectAll('circle')
+      .data(nodesData, d => d.id + '-node');
 
     // EXIT
     // Remove old elements as needed.
@@ -543,13 +547,13 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER
     // Create new elements as needed.  
     var circleEnter = circleUpdate.enter().append("circle")
-              .on("mouseover", showTooltip)
-              .on("mouseout", hideTooltip)
-              .on("click",clicked)
-              .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended));
+      .on("mouseover", showTooltip)
+      .on("mouseout", hideTooltip)
+      .on("click",clicked)
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
 
 
     /*                    
@@ -561,7 +565,7 @@ export default function link(scope, elem, attrs, ctrl) {
 
     // ENTER + UPDATE
     circleUpdate = circleUpdate.merge(circleEnter)
-      //.selectAll("circle")
+    //.selectAll("circle")
       .attr("r", radius) // TODO use cummulative value for this
       .attr("fill", d => d.group ? color(d.group) : color(0) )
 
@@ -572,8 +576,8 @@ export default function link(scope, elem, attrs, ctrl) {
     var squareSide = panel.square_side_length;
 
     var rectUpdate = svg.select(".nodes")
-                    .selectAll('rect')
-                    .data(nodesData2, d => d.id + '-node');
+      .selectAll('rect')
+      .data(nodesData2, d => d.id + '-node');
 
     // EXIT
     // Remove old elements as needed.
@@ -582,13 +586,13 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER
     // Create new elements as needed.  
     var rectEnter = rectUpdate.enter().append("rect")
-              .on("mouseover", showTooltip)
-              .on("mouseout", hideTooltip)
-              .on("click",clicked)
-              .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended));
+      .on("mouseover", showTooltip)
+      .on("mouseout", hideTooltip)
+      .on("click",clicked)
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
 
 
     // ENTER + UPDATE
@@ -605,18 +609,18 @@ export default function link(scope, elem, attrs, ctrl) {
 
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink()
-        .id(d => d.id) 
+        .id(d => d.id)
         .distance(distance)
-        .strength(d => { 
+        .strength(d => {
 
-        if(!d.value)
-          return 0.01;
+          if(!d.value)
+            return 0.01;
 
-        var strength = Math.log(d.value)/maxValueLogged;
-        if(strength < 0.01)
-          return 0.01;
+          var strength = Math.log(d.value)/maxValueLogged;
+          if(strength < 0.01)
+            return 0.01;
 
-        return strength;
+          return strength;
         })
       )
       .force("charge", d3.forceManyBody())
@@ -627,7 +631,7 @@ export default function link(scope, elem, attrs, ctrl) {
       .on("tick", ticked);
 
     simulation.force("link")
-          .links(linkData);
+      .links(linkData);
 
 
     //************************ Add Caption Colors *************************/
@@ -653,9 +657,9 @@ export default function link(scope, elem, attrs, ctrl) {
     captions.attr("height", y(null,columns.length));
 
     var columnsSorted = _.sortBy(columns, [ "group" , "text"]);
-    
+
     var captionsUpdate = captions.selectAll("g")
-                        .data(columnsSorted, (d,i) => d.text+i);
+      .data(columnsSorted, (d,i) => d.text+i);
 
     // EXIT
     // Remove old elements as needed.
@@ -664,7 +668,7 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER
     // Create new elements as needed.  
     var captionsEnter = captionsUpdate.enter()
-                        .append("g");
+      .append("g");
 
     captionsEnter
       .append("text")
@@ -680,18 +684,18 @@ export default function link(scope, elem, attrs, ctrl) {
       .text(d => d.text);
 
 
-    if(panel.combine_active)    
-        captionsMerged.append("circle")
+    if(panel.combine_active)
+      captionsMerged.append("circle")
     else
     {
-      
+
       captionsMerged
         .append(function(d){
-          var ele = d.group === 0 ? "circle" : "rect"; 
+          var ele = d.group === 0 ? "circle" : "rect";
           return d3.creator(ele).apply(this)
         })
     }
-    
+
 
 
     var colorTexts = _.map(columns,"text")
@@ -701,10 +705,10 @@ export default function link(scope, elem, attrs, ctrl) {
     // ENTER + UPDATE
     captionsMerged
       .selectAll('circle')
-        .attr("r", 7)
-        .attr("cx", 15)
-        .attr("cy", d => 25 * (columnsSortedTexts.indexOf(d.text)+1) )
-        .attr("fill", d => color( colorTexts.indexOf(d.text))  )
+      .attr("r", 7)
+      .attr("cx", 15)
+      .attr("cy", d => 25 * (columnsSortedTexts.indexOf(d.text)+1) )
+      .attr("fill", d => color( colorTexts.indexOf(d.text))  )
 
 
     captionsMerged
@@ -730,27 +734,27 @@ export default function link(scope, elem, attrs, ctrl) {
 
       circleUpdate
         .transition()
-        .duration(1000)  
-        .delay(2000) 
+        .duration(1000)
+        .delay(2000)
         .attr("r", d => checkHighlight(d) ? radius*7 : radius)
         .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
         .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
         .transition()
-        .duration(1000)  
-        .delay(1000) 
+        .duration(1000)
+        .delay(1000)
         .attr("r", radius)
 
       rectUpdate
         .transition()
-        .duration(1000)  
-        .delay(2000) 
+        .duration(1000)
+        .delay(2000)
         .attr("width", d => checkHighlight(d) ? squareSide*7 : squareSide)
         .attr("height", d => checkHighlight(d) ? squareSide*7 : squareSide)
         .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
         .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
         .transition()
-        .duration(1000)  
-        .delay(1000) 
+        .duration(1000)
+        .delay(1000)
         .attr("width", squareSide)
         .attr("height", squareSide)
 
@@ -758,12 +762,12 @@ export default function link(scope, elem, attrs, ctrl) {
     else if(ctrl.prev_highlight_text)
     {
       circleUpdate
-      .attr("stroke", "")
-      .attr("stroke-width", "")
+        .attr("stroke", "")
+        .attr("stroke-width", "")
 
       rectUpdate
-      .attr("stroke", "")
-      .attr("stroke-width", "")
+        .attr("stroke", "")
+        .attr("stroke-width", "")
 
     }
 
@@ -771,15 +775,15 @@ export default function link(scope, elem, attrs, ctrl) {
 
     function ticked() {
       linkUpdate
-          .attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; });
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
 
 
       function transformXY(d) {
         return "translate(" + d.x + "," + d.y + ")"
-      }    
+      }
 
 
       //circleUpdate.attr("transform", transformXY);
@@ -851,9 +855,9 @@ export default function link(scope, elem, attrs, ctrl) {
       var default_index = index === 0 ? default_index1 : default_index2;
       var selector = index === 0 ? color_data_index1 : color_data_index2;
       var regExp = index === 0 ? color_regexp1 : color_regexp2;
-      
+
       var selectorData ;
-      
+
       if(selector !== null)
         selectorData = d[selector];
 
@@ -901,7 +905,7 @@ export default function link(scope, elem, attrs, ctrl) {
       {
 
         showError(ctrl._error || "No data points");
-        
+
         data = [];
         addNetworkChart();
 
@@ -909,10 +913,10 @@ export default function link(scope, elem, attrs, ctrl) {
       else
       {
         addNetworkChart();
-        showError(false);  
+        showError(false);
       }
 
-    
+
     ctrl.renderingCompleted();
   }
 }

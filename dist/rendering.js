@@ -243,7 +243,6 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
               return;
             }
           }
-
           var source = d[sourceIndex];
           var target = d[targetIndex];
 
@@ -361,9 +360,16 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
         _.forEach(data, function (d) {
           var value = d[d.length - 1];
 
-          if (!isNoiseRange && !value || value < noise) return;
-
-          if (isNoiseRange && !value || value < noiseMin || value > noiseMax) return;
+          if (!isNoiseRange) {
+            if (!value || value < noise) {
+              return;
+            }
+          }
+          if (isNoiseRange) {
+            if (!value || value < noiseMin || value > noiseMax) {
+              return;
+            }
+          }
 
           var firstNode = d[0];
           var secondNode = d[1];
