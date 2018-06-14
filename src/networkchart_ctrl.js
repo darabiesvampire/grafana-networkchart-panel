@@ -4,11 +4,12 @@ import rendering from './rendering';
 
 export class NetworkChartCtrl extends MetricsPanelCtrl {
 
-  constructor($scope, $injector, $rootScope, $interpolate, $sanitize) {
+  constructor($scope, $injector, $rootScope, $interpolate, $sanitize, templateSrv) {
     super($scope, $injector);
     this.$rootScope = $rootScope;
     this.$interpolate = $interpolate;
     this.$sanitize = $sanitize;
+    this.templateSrv = templateSrv;
 
     var panelDefaults = {
       color_scale : "schemeCategory10",
@@ -132,8 +133,38 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     {
      this.panel.second_term_tooltip=  "{{" + this.columns[1].text + "}}";
     }
+    let rows = data.rows;
+    if(this.columns && this.columns.length >= 2) {
+      let pathColumn = '@path';
 
-    this.data = data.rows; //this.parsecolumnMap(this.columnMap);
+      let getIndex = (text, columnList = this.columns) => {
+        return _.findIndex(columnList, {text: text});
+      };
+      let filePathIndex = getIndex(pathColumn);
+
+      let fileGroup = this.templateSrv.replaceWithText('$file_group', this.panel.scopedVars);
+
+      let shouldGroupFiles = fileGroup !== '' && fileGroup !== '-' && fileGroup !== '$file_group';
+      if (shouldGroupFiles) {
+        let isFileGroupInt = this.isInt(fileGroup);
+        if (isFileGroupInt) {
+          let fileGroupIndex = parseInt(fileGroup, 10) - 1;
+          rows = rows.filter(item => (item[filePathIndex].match(/\//g) || []).length === fileGroupIndex);
+        } else {
+          rows = rows.filter(item => item[filePathIndex].match(fileGroup));
+        }
+      }
+
+      let fileRegexFilter = this.templateSrv.replaceWithText('$file_exclude', this.panel.scopedVars);
+      let shouldFilterFiles = fileRegexFilter !== "" && fileRegexFilter !== '-' && fileRegexFilter !== '$file_exclude';
+      if (shouldFilterFiles) {
+        let regexChecker = new RegExp(fileRegexFilter);
+        rows = rows.filter(item => !regexChecker.test(item[filePathIndex]));
+      }
+
+    }
+
+    this.data = rows; //this.parsecolumnMap(this.columnMap);
     this.render(this.data);
   }
 
@@ -146,6 +177,11 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
   highlight(){
     this.render(); 
     this.prev_highlight_text =  this.highlight_text;
+  }
+
+  isInt(value) {
+    // tslint:disable-next-line:no-bitwise
+    return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value));
   }
 }
 

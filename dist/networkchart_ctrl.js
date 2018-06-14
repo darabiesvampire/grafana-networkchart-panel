@@ -65,7 +65,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
       _export('NetworkChartCtrl', NetworkChartCtrl = function (_MetricsPanelCtrl) {
         _inherits(NetworkChartCtrl, _MetricsPanelCtrl);
 
-        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate, $sanitize) {
+        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate, $sanitize, templateSrv) {
           _classCallCheck(this, NetworkChartCtrl);
 
           var _this = _possibleConstructorReturn(this, (NetworkChartCtrl.__proto__ || Object.getPrototypeOf(NetworkChartCtrl)).call(this, $scope, $injector));
@@ -73,6 +73,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
           _this.$rootScope = $rootScope;
           _this.$interpolate = $interpolate;
           _this.$sanitize = $sanitize;
+          _this.templateSrv = templateSrv;
 
           var panelDefaults = {
             color_scale: "schemeCategory10",
@@ -153,6 +154,8 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
         }, {
           key: 'onDataReceived',
           value: function onDataReceived(dataList) {
+            var _this2 = this;
+
             var data = dataList[0];
 
             if (!data) {
@@ -181,8 +184,45 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             if (!this.panel.second_term_tooltip && this.columns[1]) {
               this.panel.second_term_tooltip = "{{" + this.columns[1].text + "}}";
             }
+            var rows = data.rows;
+            if (this.columns && this.columns.length >= 2) {
+              var pathColumn = '@path';
 
-            this.data = data.rows; //this.parsecolumnMap(this.columnMap);
+              var getIndex = function getIndex(text) {
+                var columnList = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _this2.columns;
+
+                return _.findIndex(columnList, { text: text });
+              };
+              var filePathIndex = getIndex(pathColumn);
+
+              var fileGroup = this.templateSrv.replaceWithText('$file_group', this.panel.scopedVars);
+
+              var shouldGroupFiles = fileGroup !== '' && fileGroup !== '-' && fileGroup !== '$file_group';
+              if (shouldGroupFiles) {
+                var isFileGroupInt = this.isInt(fileGroup);
+                if (isFileGroupInt) {
+                  var fileGroupIndex = parseInt(fileGroup, 10) - 1;
+                  rows = rows.filter(function (item) {
+                    return (item[filePathIndex].match(/\//g) || []).length === fileGroupIndex;
+                  });
+                } else {
+                  rows = rows.filter(function (item) {
+                    return item[filePathIndex].match(fileGroup);
+                  });
+                }
+              }
+
+              var fileRegexFilter = this.templateSrv.replaceWithText('$file_exclude', this.panel.scopedVars);
+              var shouldFilterFiles = fileRegexFilter !== "" && fileRegexFilter !== '-' && fileRegexFilter !== '$file_exclude';
+              if (shouldFilterFiles) {
+                var regexChecker = new RegExp(fileRegexFilter);
+                rows = rows.filter(function (item) {
+                  return !regexChecker.test(item[filePathIndex]);
+                });
+              }
+            }
+
+            this.data = rows; //this.parsecolumnMap(this.columnMap);
             this.render(this.data);
           }
         }, {
@@ -195,6 +235,14 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
           value: function highlight() {
             this.render();
             this.prev_highlight_text = this.highlight_text;
+          }
+        }, {
+          key: 'isInt',
+          value: function isInt(value) {
+            // tslint:disable-next-line:no-bitwise
+            return !isNaN(value) && function (x) {
+              return (x | 0) === x;
+            }(parseFloat(value));
           }
         }]);
 
