@@ -717,7 +717,7 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
         if (regExp) {
           var result = regExp.exec(d[index]);
 
-          if (result.length) selectorData = result[result.length - 1];
+          if (result && result.length) selectorData = result[result.length - 1];
         }
 
         if (selectorData) {

@@ -864,7 +864,7 @@ export default function link(scope, elem, attrs, ctrl) {
       if(regExp){
         var result =regExp.exec(d[index]);
 
-        if(result.length)
+        if(result && result.length)
           selectorData = result[result.length-1];
       }
 
