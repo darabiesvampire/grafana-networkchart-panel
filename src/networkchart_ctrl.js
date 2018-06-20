@@ -141,6 +141,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
         return _.findIndex(columnList, {text: text});
       };
       let filePathIndex = getIndex(pathColumn);
+      //let valueIndex = columnList.length - 1;
 
       let fileGroup = this.templateSrv.replaceWithText('$file_group', this.panel.scopedVars);
 
@@ -160,6 +161,54 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       if (shouldFilterFiles) {
         let regexChecker = new RegExp(fileRegexFilter);
         rows = rows.filter(item => !regexChecker.test(item[filePathIndex]));
+      }
+
+      let metricFilterEdge = this.templateSrv.replaceWithText('$metric_range_edge', this.panel.scopedVars);
+      if (metricFilterEdge) {
+        metricFilterEdge = metricFilterEdge.trim();
+      }
+      let shouldFilterMetricEdge = metricFilterEdge !== "" && metricFilterEdge !== '-' && metricFilterEdge !== '$metric_range_edge';
+      if (shouldFilterMetricEdge) {
+        this.panel.noise = metricFilterEdge;
+      }
+      else {
+        this.panel.noise = 50;
+      }
+
+      let metricFilterIssue = this.templateSrv.replaceWithText('$metric_range_issue', this.panel.scopedVars);
+      if (metricFilterIssue) {
+        metricFilterIssue = metricFilterIssue.trim();
+      }
+      let shouldFilterMetricIssue = metricFilterIssue !== "" && metricFilterIssue !== '-' && metricFilterIssue !== '$metric_range_issue';
+      if (shouldFilterMetricIssue) {
+        this.panel.nodes_noise = metricFilterIssue;
+      }
+      else {
+        this.panel.nodes_noise = 50;
+      }
+
+      let minFiles = this.templateSrv.replaceWithText('$min_files', this.panel.scopedVars);
+      if (minFiles) {
+         minFiles = minFiles.trim();
+      }
+      let shouldApplyMinFiles = minFiles !== "" && minFiles !== '-' && minFiles !== '$min_files';
+      if (shouldApplyMinFiles) {
+        this.panel.first_filter_minumum_number_of_links = minFiles;
+      }
+      else {
+        this.panel.first_filter_minumum_number_of_links = 0;
+      }
+
+      let minIssues = this.templateSrv.replaceWithText('$min_issues', this.panel.scopedVars);
+      if (minIssues) {
+        minIssues = minIssues.trim();
+      }
+      let shouldApplyMinIssues = minIssues !== "" && minIssues !== '-' && minIssues !== '$min_issues';
+      if (shouldApplyMinIssues) {
+        this.panel.second_filter_minumum_number_of_links = minIssues;
+      }
+      else {
+        this.panel.second_filter_minumum_number_of_links = 0;
       }
 
     }

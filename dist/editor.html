@@ -51,7 +51,7 @@
 			<input type="text" class="gf-form-input max-width-10"
 			ng-model="ctrl.panel.nodes_noise" 
 			ng-model-options="{debounce: 100}" 
-			ng-change="ctrl.render()">
+			ng-change="ctrl.render()" disabled>
 			<info-popover mode="right-absolute">Show only the nodes (and their related nodes/edges) that are more than the Node's Total noise canceling.</info-popover>
 		</div>
 
@@ -115,7 +115,7 @@
 			<input type="text" class="gf-form-input max-width-12" 
 			ng-model="ctrl.panel.first_filter_minumum_number_of_links" 
 			ng-model-options="{debounce: 500}" 
-			ng-change="ctrl.render()">
+			ng-change="ctrl.render()" disabled>
 
 			<info-popover mode="right-absolute">Filter if the edge count of the node is less than the 'input' number of minumum edges
 			</info-popover>
@@ -178,7 +178,7 @@
 			<input type="text" class="gf-form-input max-width-12" 
 			ng-model="ctrl.panel.second_filter_minumum_number_of_links" 
 			ng-model-options="{debounce: 500}" 
-			ng-change="ctrl.render()">
+			ng-change="ctrl.render()" disabled>
 
 			<info-popover mode="right-absolute">Filter if the edge count of the node is less than the 'input' number of minumum edges
 			</info-popover>
@@ -242,7 +242,7 @@
 			<input type="text" class="gf-form-input max-width-10"
 			ng-model="ctrl.panel.noise" 
 			ng-model-options="{debounce: 250}" 
-			ng-change="ctrl.render()">
+			ng-change="ctrl.render()" disabled>
 			<info-popover mode="right-absolute">Show only the egdes (and related nodes) that are more than the Edge noise canceling.</info-popover>
 		</div>
 

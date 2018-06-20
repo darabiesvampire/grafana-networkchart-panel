@@ -194,6 +194,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
                 return _.findIndex(columnList, { text: text });
               };
               var filePathIndex = getIndex(pathColumn);
+              //let valueIndex = columnList.length - 1;
 
               var fileGroup = this.templateSrv.replaceWithText('$file_group', this.panel.scopedVars);
 
@@ -219,6 +220,50 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
                 rows = rows.filter(function (item) {
                   return !regexChecker.test(item[filePathIndex]);
                 });
+              }
+
+              var metricFilterEdge = this.templateSrv.replaceWithText('$metric_range_edge', this.panel.scopedVars);
+              if (metricFilterEdge) {
+                metricFilterEdge = metricFilterEdge.trim();
+              }
+              var shouldFilterMetricEdge = metricFilterEdge !== "" && metricFilterEdge !== '-' && metricFilterEdge !== '$metric_range_edge';
+              if (shouldFilterMetricEdge) {
+                this.panel.noise = metricFilterEdge;
+              } else {
+                this.panel.noise = 50;
+              }
+
+              var metricFilterIssue = this.templateSrv.replaceWithText('$metric_range_issue', this.panel.scopedVars);
+              if (metricFilterIssue) {
+                metricFilterIssue = metricFilterIssue.trim();
+              }
+              var shouldFilterMetricIssue = metricFilterIssue !== "" && metricFilterIssue !== '-' && metricFilterIssue !== '$metric_range_issue';
+              if (shouldFilterMetricIssue) {
+                this.panel.nodes_noise = metricFilterIssue;
+              } else {
+                this.panel.nodes_noise = 50;
+              }
+
+              var minFiles = this.templateSrv.replaceWithText('$min_files', this.panel.scopedVars);
+              if (minFiles) {
+                minFiles = minFiles.trim();
+              }
+              var shouldApplyMinFiles = minFiles !== "" && minFiles !== '-' && minFiles !== '$min_files';
+              if (shouldApplyMinFiles) {
+                this.panel.first_filter_minumum_number_of_links = minFiles;
+              } else {
+                this.panel.first_filter_minumum_number_of_links = 0;
+              }
+
+              var minIssues = this.templateSrv.replaceWithText('$min_issues', this.panel.scopedVars);
+              if (minIssues) {
+                minIssues = minIssues.trim();
+              }
+              var shouldApplyMinIssues = minIssues !== "" && minIssues !== '-' && minIssues !== '$min_issues';
+              if (shouldApplyMinIssues) {
+                this.panel.second_filter_minumum_number_of_links = minIssues;
+              } else {
+                this.panel.second_filter_minumum_number_of_links = 0;
               }
             }
 
