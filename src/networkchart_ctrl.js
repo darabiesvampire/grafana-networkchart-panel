@@ -156,6 +156,14 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
         }
       }
 
+      let fileInclusionFilter = this.templateSrv.replaceWithText('$file_include', this.panel.scopedVars);
+      let shouldApplyFileInclusion = fileInclusionFilter !== "" && fileInclusionFilter !== '-' && fileInclusionFilter !== '$file_include';
+      if (shouldApplyFileInclusion) {
+        let regexChecker = new RegExp(fileInclusionFilter);
+        rows = rows.filter(item => regexChecker.test(item[filePathIndex]));
+      }
+
+
       let fileRegexFilter = this.templateSrv.replaceWithText('$file_exclude', this.panel.scopedVars);
       let shouldFilterFiles = fileRegexFilter !== "" && fileRegexFilter !== '-' && fileRegexFilter !== '$file_exclude';
       if (shouldFilterFiles) {

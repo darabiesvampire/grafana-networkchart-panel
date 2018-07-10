@@ -213,12 +213,21 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
                 }
               }
 
+              var fileInclusionFilter = this.templateSrv.replaceWithText('$file_include', this.panel.scopedVars);
+              var shouldApplyFileInclusion = fileInclusionFilter !== "" && fileInclusionFilter !== '-' && fileInclusionFilter !== '$file_include';
+              if (shouldApplyFileInclusion) {
+                var regexChecker = new RegExp(fileInclusionFilter);
+                rows = rows.filter(function (item) {
+                  return regexChecker.test(item[filePathIndex]);
+                });
+              }
+
               var fileRegexFilter = this.templateSrv.replaceWithText('$file_exclude', this.panel.scopedVars);
               var shouldFilterFiles = fileRegexFilter !== "" && fileRegexFilter !== '-' && fileRegexFilter !== '$file_exclude';
               if (shouldFilterFiles) {
-                var regexChecker = new RegExp(fileRegexFilter);
+                var _regexChecker = new RegExp(fileRegexFilter);
                 rows = rows.filter(function (item) {
-                  return !regexChecker.test(item[filePathIndex]);
+                  return !_regexChecker.test(item[filePathIndex]);
                 });
               }
 
