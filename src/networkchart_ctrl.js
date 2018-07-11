@@ -149,7 +149,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       if (shouldGroupFiles) {
         let isFileGroupInt = this.isInt(fileGroup);
         if (isFileGroupInt) {
-          let fileGroupIndex = parseInt(fileGroup, 10) - 1;
+          let fileGroupIndex = parseInt(fileGroup, 10);
           rows = rows.filter(item => (item[filePathIndex].match(/\//g) || []).length === fileGroupIndex);
         } else {
           rows = rows.filter(item => item[filePathIndex].match(fileGroup));

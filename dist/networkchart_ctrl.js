@@ -202,7 +202,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
               if (shouldGroupFiles) {
                 var isFileGroupInt = this.isInt(fileGroup);
                 if (isFileGroupInt) {
-                  var fileGroupIndex = parseInt(fileGroup, 10) - 1;
+                  var fileGroupIndex = parseInt(fileGroup, 10);
                   rows = rows.filter(function (item) {
                     return (item[filePathIndex].match(/\//g) || []).length === fileGroupIndex;
                   });
