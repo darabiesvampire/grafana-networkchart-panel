@@ -263,11 +263,11 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
                   });
                 }
 
-                var fileDerivativeFilter = _this2.templateSrv.replaceWithText('$derivative_level');
-                var shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$derivative_level';
+                var fileDerivativeFilter = _this2.templateSrv.replaceWithText('$variation_level');
+                var shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$variation_level';
 
-                var minFileDerivative = _this2.templateSrv.replaceWithText('$min_derivative_level');
-                var shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_derivative_level';
+                var minFileDerivative = _this2.templateSrv.replaceWithText('$min_variation_level');
+                var shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_variation_level';
 
                 if (shouldApplyDerivativeFilter && shouldApplyMinDerivative && _this2.isInt(minFileDerivative) && _this2.isInt(fileDerivativeFilter)) {
                   var derivativeLevel = parseInt(fileDerivativeFilter, 10);

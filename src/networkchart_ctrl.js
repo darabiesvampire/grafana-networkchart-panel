@@ -204,11 +204,11 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
         rows = rows.filter(item => !regexChecker.test(item[filePathIndex]));
       }
 
-      let fileDerivativeFilter = this.templateSrv.replaceWithText('$derivative_level');
-      let shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$derivative_level';
+      let fileDerivativeFilter = this.templateSrv.replaceWithText('$variation_level');
+      let shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$variation_level';
 
-      let minFileDerivative = this.templateSrv.replaceWithText('$min_derivative_level');
-      let shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_derivative_level';
+      let minFileDerivative = this.templateSrv.replaceWithText('$min_variation_level');
+      let shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_variation_level';
 
       if (shouldApplyDerivativeFilter && shouldApplyMinDerivative && this.isInt(minFileDerivative) && this.isInt(fileDerivativeFilter)) {
         let derivativeLevel = parseInt(fileDerivativeFilter, 10);
