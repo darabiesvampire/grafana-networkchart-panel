@@ -136,12 +136,45 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     let rows = data.rows;
     if(this.columns && this.columns.length >= 2) {
       let pathColumn = '@path';
+      let issueIdColumn = '@issueId';
+      let authorColumn = '@author';
+      let intervalColumn = '$interval';
+
 
       let getIndex = (text, columnList = this.columns) => {
         return _.findIndex(columnList, {text: text});
       };
+
+      let getNthIndex = (word, substring, index) => {
+        return word.split(substring, index).join(substring).length;
+      };
+
+      let groupBy = (xs, key) => {
+        return xs.reduce((rv, x) => {
+          (rv[x[key]] = rv[x[key]] || []).push(x);
+          return rv;
+        }, {});
+      };
+
+
+      let groupByArray = (dataToBeGrouped, groupKey) => {
+        let groupObjectdata = groupBy(dataToBeGrouped, groupKey);
+        return Object.keys(groupObjectdata)
+          .map(item => {
+            return ({item, connections: groupObjectdata[item]});
+          });
+      };
+
+
       let filePathIndex = getIndex(pathColumn);
       //let valueIndex = columnList.length - 1;
+      let issueIdIndex = getIndex(issueIdColumn);
+      if (issueIdIndex === -1) {
+        issueIdIndex = getIndex(authorColumn);
+        if (issueIdIndex === -1) {
+          issueIdIndex = getIndex(intervalColumn);
+        }
+      }
 
       let fileGroup = this.templateSrv.replaceWithText('$file_group', this.panel.scopedVars);
 
@@ -169,6 +202,41 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       if (shouldFilterFiles) {
         let regexChecker = new RegExp(fileRegexFilter);
         rows = rows.filter(item => !regexChecker.test(item[filePathIndex]));
+      }
+
+      let fileDerivativeFilter = this.templateSrv.replaceWithText('$derivative_level');
+      let shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$derivative_level';
+
+      let minFileDerivative = this.templateSrv.replaceWithText('$min_derivative_level');
+      let shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_derivative_level';
+
+      if (shouldApplyDerivativeFilter && shouldApplyMinDerivative && this.isInt(minFileDerivative) && this.isInt(fileDerivativeFilter)) {
+        let derivativeLevel = parseInt(fileDerivativeFilter, 10);
+        let minDerivativeLevel = parseInt(minFileDerivative, 10);
+        let tempRows = rows.map(x => {
+            let originalPath = x[filePathIndex];
+            let changedParam = {};
+            changedParam[filePathIndex] = x[filePathIndex].substring(0, getNthIndex(originalPath, '/', derivativeLevel))
+            return Object.assign({}, x, changedParam);
+          });
+        let issueGroupedArray = groupByArray(tempRows, issueIdIndex);
+        let acceptedIssues = {};
+        for (let i = 0; i < issueGroupedArray.length; i++) {
+          let tempIssueId = issueGroupedArray[i].item;
+          var count = issueGroupedArray[i].connections.reduce(function(values, v) {
+
+            if (!values.set[v[filePathIndex]]) {
+              values.set[v[filePathIndex]] = 1;
+              values.count++;
+            }
+            return values;
+          }, { set: {}, count: 0 }).count;
+          if (count >= minDerivativeLevel) {
+            acceptedIssues[tempIssueId] = true;
+          }
+        }
+
+        rows = rows.filter(item => acceptedIssues[item[issueIdIndex]]);
       }
 
       let metricFilterEdge = this.templateSrv.replaceWithText('$metric_range_edge', this.panel.scopedVars);
