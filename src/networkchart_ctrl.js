@@ -4,13 +4,13 @@ import rendering from './rendering';
 
 export class NetworkChartCtrl extends MetricsPanelCtrl {
 
-  constructor($scope, $injector, $rootScope, $interpolate, $sanitize, templateSrv) {
+  constructor($scope, $injector, $rootScope, $interpolate, $sanitize, templateSrv, detangleSrv) {
     super($scope, $injector);
     this.$rootScope = $rootScope;
     this.$interpolate = $interpolate;
     this.$sanitize = $sanitize;
     this.templateSrv = templateSrv;
-
+    this.detangleSrv = detangleSrv;
     var panelDefaults = {
       color_scale : "schemeCategory10",
       first_color_selector : "index",
@@ -34,11 +34,11 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       hide_internal_relationships: false,
       
       remove_noise : false,
-      noise : 20,
+      noise : 0,
 
 
       nodes_remove_noise : false,
-      nodes_noise : 100,
+      nodes_noise : 0,
 
       first_filter_minumum_number_of_links : 0,
       second_filter_minumum_number_of_links: 0
@@ -133,136 +133,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
     {
      this.panel.second_term_tooltip=  "{{" + this.columns[1].text + "}}";
     }
-    let rows = data.rows;
     if(this.columns && this.columns.length >= 2) {
-      let pathColumn = '@path';
-      let issueIdColumn = '@issueId';
-      let authorColumn = '@author';
-      let intervalColumn = '$interval';
-
-
-      let getIndex = (text, columnList = this.columns) => {
-        return _.findIndex(columnList, {text: text});
-      };
-
-      let getNthIndex = (word, substring, index) => {
-        return word.split(substring, index).join(substring).length;
-      };
-
-      let groupBy = (xs, key) => {
-        return xs.reduce((rv, x) => {
-          (rv[x[key]] = rv[x[key]] || []).push(x);
-          return rv;
-        }, {});
-      };
-
-
-      let groupByArray = (dataToBeGrouped, groupKey) => {
-        let groupObjectdata = groupBy(dataToBeGrouped, groupKey);
-        return Object.keys(groupObjectdata)
-          .map(item => {
-            return ({item, connections: groupObjectdata[item]});
-          });
-      };
-
-
-      let filePathIndex = getIndex(pathColumn);
-      //let valueIndex = columnList.length - 1;
-      let issueIdIndex = getIndex(issueIdColumn);
-      if (issueIdIndex === -1) {
-        issueIdIndex = getIndex(authorColumn);
-        if (issueIdIndex === -1) {
-          issueIdIndex = getIndex(intervalColumn);
-        }
-      }
-
-      let fileGroup = this.templateSrv.replaceWithText('$file_group', this.panel.scopedVars);
-
-      let shouldGroupFiles = fileGroup !== '' && fileGroup !== '-' && fileGroup !== '$file_group';
-      if (shouldGroupFiles) {
-        let isFileGroupInt = this.isInt(fileGroup);
-        if (isFileGroupInt) {
-          let fileGroupIndex = parseInt(fileGroup, 10);
-          rows = rows.filter(item => (item[filePathIndex].match(/\//g) || []).length === fileGroupIndex);
-        } else {
-          rows = rows.filter(item => item[filePathIndex].match(fileGroup));
-        }
-      }
-
-      let fileInclusionFilter = this.templateSrv.replaceWithText('$file_include', this.panel.scopedVars);
-      let shouldApplyFileInclusion = fileInclusionFilter !== "" && fileInclusionFilter !== '-' && fileInclusionFilter !== '$file_include';
-      if (shouldApplyFileInclusion) {
-        let regexChecker = new RegExp(fileInclusionFilter);
-        rows = rows.filter(item => regexChecker.test(item[filePathIndex]));
-      }
-
-
-      let fileRegexFilter = this.templateSrv.replaceWithText('$file_exclude', this.panel.scopedVars);
-      let shouldFilterFiles = fileRegexFilter !== "" && fileRegexFilter !== '-' && fileRegexFilter !== '$file_exclude';
-      if (shouldFilterFiles) {
-        let regexChecker = new RegExp(fileRegexFilter);
-        rows = rows.filter(item => !regexChecker.test(item[filePathIndex]));
-      }
-
-      let fileDerivativeFilter = this.templateSrv.replaceWithText('$variation_level');
-      let shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$variation_level';
-
-      let minFileDerivative = this.templateSrv.replaceWithText('$min_variation_level');
-      let shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_variation_level';
-
-      if (shouldApplyDerivativeFilter && shouldApplyMinDerivative && this.isInt(minFileDerivative) && this.isInt(fileDerivativeFilter)) {
-        let derivativeLevel = parseInt(fileDerivativeFilter, 10);
-        let minDerivativeLevel = parseInt(minFileDerivative, 10);
-        let tempRows = rows.map(x => {
-            let originalPath = x[filePathIndex];
-            let changedParam = {};
-            changedParam[filePathIndex] = x[filePathIndex].substring(0, getNthIndex(originalPath, '/', derivativeLevel))
-            return Object.assign({}, x, changedParam);
-          });
-        let issueGroupedArray = groupByArray(tempRows, issueIdIndex);
-        let acceptedIssues = {};
-        for (let i = 0; i < issueGroupedArray.length; i++) {
-          let tempIssueId = issueGroupedArray[i].item;
-          var count = issueGroupedArray[i].connections.reduce(function(values, v) {
-
-            if (!values.set[v[filePathIndex]]) {
-              values.set[v[filePathIndex]] = 1;
-              values.count++;
-            }
-            return values;
-          }, { set: {}, count: 0 }).count;
-          if (count >= minDerivativeLevel) {
-            acceptedIssues[tempIssueId] = true;
-          }
-        }
-
-        rows = rows.filter(item => acceptedIssues[item[issueIdIndex]]);
-      }
-
-      let metricFilterEdge = this.templateSrv.replaceWithText('$metric_range_edge', this.panel.scopedVars);
-      if (metricFilterEdge) {
-        metricFilterEdge = metricFilterEdge.trim();
-      }
-      let shouldFilterMetricEdge = metricFilterEdge !== "" && metricFilterEdge !== '-' && metricFilterEdge !== '$metric_range_edge';
-      if (shouldFilterMetricEdge) {
-        this.panel.noise = metricFilterEdge;
-      }
-      else {
-        this.panel.noise = 50;
-      }
-
-      let metricFilterIssue = this.templateSrv.replaceWithText('$metric_range_issue', this.panel.scopedVars);
-      if (metricFilterIssue) {
-        metricFilterIssue = metricFilterIssue.trim();
-      }
-      let shouldFilterMetricIssue = metricFilterIssue !== "" && metricFilterIssue !== '-' && metricFilterIssue !== '$metric_range_issue';
-      if (shouldFilterMetricIssue) {
-        this.panel.nodes_noise = metricFilterIssue;
-      }
-      else {
-        this.panel.nodes_noise = 50;
-      }
-
       let minFiles = this.templateSrv.replaceWithText('$min_files', this.panel.scopedVars);
       if (minFiles) {
          minFiles = minFiles.trim();
@@ -288,8 +159,7 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
       }
 
     }
-
-    this.data = rows; //this.parsecolumnMap(this.columnMap);
+    this.data = this.detangleSrv.dataFilter(dataList, this.detangleSrv.getCustomConfig(this.templateSrv, this.panel))[0].rows;
     this.render(this.data);
   }
 

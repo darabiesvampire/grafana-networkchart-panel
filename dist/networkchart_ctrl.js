@@ -65,7 +65,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
       _export('NetworkChartCtrl', NetworkChartCtrl = function (_MetricsPanelCtrl) {
         _inherits(NetworkChartCtrl, _MetricsPanelCtrl);
 
-        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate, $sanitize, templateSrv) {
+        function NetworkChartCtrl($scope, $injector, $rootScope, $interpolate, $sanitize, templateSrv, detangleSrv) {
           _classCallCheck(this, NetworkChartCtrl);
 
           var _this = _possibleConstructorReturn(this, (NetworkChartCtrl.__proto__ || Object.getPrototypeOf(NetworkChartCtrl)).call(this, $scope, $injector));
@@ -74,7 +74,7 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
           _this.$interpolate = $interpolate;
           _this.$sanitize = $sanitize;
           _this.templateSrv = templateSrv;
-
+          _this.detangleSrv = detangleSrv;
           var panelDefaults = {
             color_scale: "schemeCategory10",
             first_color_selector: "index",
@@ -98,10 +98,10 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             hide_internal_relationships: false,
 
             remove_noise: false,
-            noise: 20,
+            noise: 0,
 
             nodes_remove_noise: false,
-            nodes_noise: 100,
+            nodes_noise: 0,
 
             first_filter_minumum_number_of_links: 0,
             second_filter_minumum_number_of_links: 0
@@ -154,8 +154,6 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
         }, {
           key: 'onDataReceived',
           value: function onDataReceived(dataList) {
-            var _this2 = this;
-
             var data = dataList[0];
 
             if (!data) {
@@ -184,170 +182,30 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
             if (!this.panel.second_term_tooltip && this.columns[1]) {
               this.panel.second_term_tooltip = "{{" + this.columns[1].text + "}}";
             }
-            var rows = data.rows;
             if (this.columns && this.columns.length >= 2) {
-              var count;
+              var minFiles = this.templateSrv.replaceWithText('$min_files', this.panel.scopedVars);
+              if (minFiles) {
+                minFiles = minFiles.trim();
+              }
+              var shouldApplyMinFiles = minFiles !== "" && minFiles !== '-' && minFiles !== '$min_files';
+              if (shouldApplyMinFiles) {
+                this.panel.first_filter_minumum_number_of_links = minFiles;
+              } else {
+                this.panel.first_filter_minumum_number_of_links = 0;
+              }
 
-              (function () {
-                var pathColumn = '@path';
-                var issueIdColumn = '@issueId';
-                var authorColumn = '@author';
-                var intervalColumn = '$interval';
-
-                var getIndex = function getIndex(text) {
-                  var columnList = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _this2.columns;
-
-                  return _.findIndex(columnList, { text: text });
-                };
-
-                var getNthIndex = function getNthIndex(word, substring, index) {
-                  return word.split(substring, index).join(substring).length;
-                };
-
-                var groupBy = function groupBy(xs, key) {
-                  return xs.reduce(function (rv, x) {
-                    (rv[x[key]] = rv[x[key]] || []).push(x);
-                    return rv;
-                  }, {});
-                };
-
-                var groupByArray = function groupByArray(dataToBeGrouped, groupKey) {
-                  var groupObjectdata = groupBy(dataToBeGrouped, groupKey);
-                  return Object.keys(groupObjectdata).map(function (item) {
-                    return { item: item, connections: groupObjectdata[item] };
-                  });
-                };
-
-                var filePathIndex = getIndex(pathColumn);
-                //let valueIndex = columnList.length - 1;
-                var issueIdIndex = getIndex(issueIdColumn);
-                if (issueIdIndex === -1) {
-                  issueIdIndex = getIndex(authorColumn);
-                  if (issueIdIndex === -1) {
-                    issueIdIndex = getIndex(intervalColumn);
-                  }
-                }
-
-                var fileGroup = _this2.templateSrv.replaceWithText('$file_group', _this2.panel.scopedVars);
-
-                var shouldGroupFiles = fileGroup !== '' && fileGroup !== '-' && fileGroup !== '$file_group';
-                if (shouldGroupFiles) {
-                  var isFileGroupInt = _this2.isInt(fileGroup);
-                  if (isFileGroupInt) {
-                    var fileGroupIndex = parseInt(fileGroup, 10);
-                    rows = rows.filter(function (item) {
-                      return (item[filePathIndex].match(/\//g) || []).length === fileGroupIndex;
-                    });
-                  } else {
-                    rows = rows.filter(function (item) {
-                      return item[filePathIndex].match(fileGroup);
-                    });
-                  }
-                }
-
-                var fileInclusionFilter = _this2.templateSrv.replaceWithText('$file_include', _this2.panel.scopedVars);
-                var shouldApplyFileInclusion = fileInclusionFilter !== "" && fileInclusionFilter !== '-' && fileInclusionFilter !== '$file_include';
-                if (shouldApplyFileInclusion) {
-                  var regexChecker = new RegExp(fileInclusionFilter);
-                  rows = rows.filter(function (item) {
-                    return regexChecker.test(item[filePathIndex]);
-                  });
-                }
-
-                var fileRegexFilter = _this2.templateSrv.replaceWithText('$file_exclude', _this2.panel.scopedVars);
-                var shouldFilterFiles = fileRegexFilter !== "" && fileRegexFilter !== '-' && fileRegexFilter !== '$file_exclude';
-                if (shouldFilterFiles) {
-                  var _regexChecker = new RegExp(fileRegexFilter);
-                  rows = rows.filter(function (item) {
-                    return !_regexChecker.test(item[filePathIndex]);
-                  });
-                }
-
-                var fileDerivativeFilter = _this2.templateSrv.replaceWithText('$variation_level');
-                var shouldApplyDerivativeFilter = fileDerivativeFilter !== "" && fileDerivativeFilter !== '-' && fileDerivativeFilter !== '$variation_level';
-
-                var minFileDerivative = _this2.templateSrv.replaceWithText('$min_variation_level');
-                var shouldApplyMinDerivative = minFileDerivative !== "" && minFileDerivative !== '-' && minFileDerivative !== '$min_variation_level';
-
-                if (shouldApplyDerivativeFilter && shouldApplyMinDerivative && _this2.isInt(minFileDerivative) && _this2.isInt(fileDerivativeFilter)) {
-                  var derivativeLevel = parseInt(fileDerivativeFilter, 10);
-                  var minDerivativeLevel = parseInt(minFileDerivative, 10);
-                  var tempRows = rows.map(function (x) {
-                    var originalPath = x[filePathIndex];
-                    var changedParam = {};
-                    changedParam[filePathIndex] = x[filePathIndex].substring(0, getNthIndex(originalPath, '/', derivativeLevel));
-                    return Object.assign({}, x, changedParam);
-                  });
-                  var issueGroupedArray = groupByArray(tempRows, issueIdIndex);
-                  var acceptedIssues = {};
-                  for (var i = 0; i < issueGroupedArray.length; i++) {
-                    var tempIssueId = issueGroupedArray[i].item;
-                    count = issueGroupedArray[i].connections.reduce(function (values, v) {
-
-                      if (!values.set[v[filePathIndex]]) {
-                        values.set[v[filePathIndex]] = 1;
-                        values.count++;
-                      }
-                      return values;
-                    }, { set: {}, count: 0 }).count;
-
-                    if (count >= minDerivativeLevel) {
-                      acceptedIssues[tempIssueId] = true;
-                    }
-                  }
-
-                  rows = rows.filter(function (item) {
-                    return acceptedIssues[item[issueIdIndex]];
-                  });
-                }
-
-                var metricFilterEdge = _this2.templateSrv.replaceWithText('$metric_range_edge', _this2.panel.scopedVars);
-                if (metricFilterEdge) {
-                  metricFilterEdge = metricFilterEdge.trim();
-                }
-                var shouldFilterMetricEdge = metricFilterEdge !== "" && metricFilterEdge !== '-' && metricFilterEdge !== '$metric_range_edge';
-                if (shouldFilterMetricEdge) {
-                  _this2.panel.noise = metricFilterEdge;
-                } else {
-                  _this2.panel.noise = 50;
-                }
-
-                var metricFilterIssue = _this2.templateSrv.replaceWithText('$metric_range_issue', _this2.panel.scopedVars);
-                if (metricFilterIssue) {
-                  metricFilterIssue = metricFilterIssue.trim();
-                }
-                var shouldFilterMetricIssue = metricFilterIssue !== "" && metricFilterIssue !== '-' && metricFilterIssue !== '$metric_range_issue';
-                if (shouldFilterMetricIssue) {
-                  _this2.panel.nodes_noise = metricFilterIssue;
-                } else {
-                  _this2.panel.nodes_noise = 50;
-                }
-
-                var minFiles = _this2.templateSrv.replaceWithText('$min_files', _this2.panel.scopedVars);
-                if (minFiles) {
-                  minFiles = minFiles.trim();
-                }
-                var shouldApplyMinFiles = minFiles !== "" && minFiles !== '-' && minFiles !== '$min_files';
-                if (shouldApplyMinFiles) {
-                  _this2.panel.first_filter_minumum_number_of_links = minFiles;
-                } else {
-                  _this2.panel.first_filter_minumum_number_of_links = 0;
-                }
-
-                var minIssues = _this2.templateSrv.replaceWithText('$min_issues', _this2.panel.scopedVars);
-                if (minIssues) {
-                  minIssues = minIssues.trim();
-                }
-                var shouldApplyMinIssues = minIssues !== "" && minIssues !== '-' && minIssues !== '$min_issues';
-                if (shouldApplyMinIssues) {
-                  _this2.panel.second_filter_minumum_number_of_links = minIssues;
-                } else {
-                  _this2.panel.second_filter_minumum_number_of_links = 0;
-                }
-              })();
+              var minIssues = this.templateSrv.replaceWithText('$min_issues', this.panel.scopedVars);
+              if (minIssues) {
+                minIssues = minIssues.trim();
+              }
+              var shouldApplyMinIssues = minIssues !== "" && minIssues !== '-' && minIssues !== '$min_issues';
+              if (shouldApplyMinIssues) {
+                this.panel.second_filter_minumum_number_of_links = minIssues;
+              } else {
+                this.panel.second_filter_minumum_number_of_links = 0;
+              }
             }
-
-            this.data = rows; //this.parsecolumnMap(this.columnMap);
+            this.data = this.detangleSrv.dataFilter(dataList, this.detangleSrv.getCustomConfig(this.templateSrv, this.panel))[0].rows;
             this.render(this.data);
           }
         }, {
