@@ -183,16 +183,6 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
               this.panel.second_term_tooltip = "{{" + this.columns[1].text + "}}";
             }
             if (this.columns && this.columns.length >= 2) {
-              var minFiles = this.templateSrv.replaceWithText('$min_files', this.panel.scopedVars);
-              if (minFiles) {
-                minFiles = minFiles.trim();
-              }
-              var shouldApplyMinFiles = minFiles !== "" && minFiles !== '-' && minFiles !== '$min_files';
-              if (shouldApplyMinFiles) {
-                this.panel.first_filter_minumum_number_of_links = minFiles;
-              } else {
-                this.panel.first_filter_minumum_number_of_links = 0;
-              }
 
               var minIssues = this.templateSrv.replaceWithText('$min_issues', this.panel.scopedVars);
               if (minIssues) {
