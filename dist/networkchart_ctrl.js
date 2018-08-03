@@ -194,6 +194,17 @@ System.register(['app/plugins/sdk', 'lodash', './rendering'], function (_export,
               } else {
                 this.panel.second_filter_minumum_number_of_links = 0;
               }
+
+              var combine = this.templateSrv.replaceWithText('$combine', this.panel.scopedVars);
+              if (combine) {
+                combine = combine.trim();
+              }
+              var shouldApplyCombine = combine !== "" && combine !== '-' && combine !== '$combine';
+              if (shouldApplyCombine) {
+                this.panel.combine_active = combine === 'true' ? true : false;
+              } else {
+                this.panel.combine_active = true;
+              }
             }
             this.data = this.detangleSrv.dataFilter(dataList, this.detangleSrv.getCustomConfig(this.templateSrv, this.panel))[0].rows;
             this.render(this.data);
