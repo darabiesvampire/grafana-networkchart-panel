@@ -136,6 +136,9 @@ export default function link(scope, elem, attrs, ctrl) {
 
     var color = d3.scaleOrdinal(d3[panel.color_scale]);
 
+    var selectedConstantGroups = 'Bug';
+    var selectedGroupIndex = -1;
+    var selectedColor = '#e41a1c';
 
     var noise = panel.remove_noise ? panel.noise : 3;
     var nodes_noise = panel.nodes_remove_noise ? panel.nodes_noise : 0;
@@ -567,7 +570,9 @@ export default function link(scope, elem, attrs, ctrl) {
     circleUpdate = circleUpdate.merge(circleEnter)
     //.selectAll("circle")
       .attr("r", radius) // TODO use cummulative value for this
-      .attr("fill", d => d.group ? color(d.group) : color(0) )
+      .attr("fill", d => {
+        return d.group ? d.group === selectedGroupIndex ? selectedColor : color(d.group) : color(0)
+      } );
 
 
     //************************ Rectangles d3 *************************/
@@ -708,7 +713,10 @@ export default function link(scope, elem, attrs, ctrl) {
       .attr("r", 7)
       .attr("cx", 15)
       .attr("cy", d => 25 * (columnsSortedTexts.indexOf(d.text)+1) )
-      .attr("fill", d => color( colorTexts.indexOf(d.text))  )
+      .attr("fill", d =>  {
+        let indexOfSelected = colorTexts.indexOf(d.text);
+        return (indexOfSelected === selectedGroupIndex) ? selectedColor : color( colorTexts.indexOf(d.text))
+      }  );
 
 
     captionsMerged
@@ -877,6 +885,9 @@ export default function link(scope, elem, attrs, ctrl) {
             text: selectorData,
             group: index
           });
+          if (selectorData === selectedConstantGroups) {
+            selectedGroupIndex = group;
+          }
         }
       }
       else
