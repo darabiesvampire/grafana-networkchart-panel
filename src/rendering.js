@@ -14,7 +14,7 @@ export default function link(scope, elem, attrs, ctrl) {
 
 
 
-  var data,panel, svgWrapper, highlight_text ;
+  var data,panel, svgWrapper, highlight_text, issues_highlight_text ;
   var tooltipEle = elem.find('.tooltip');
   var captionEle = elem.find('.caption');
 
@@ -135,6 +135,8 @@ export default function link(scope, elem, attrs, ctrl) {
     var height = elem.height();
 
     var color = d3.scaleOrdinal(d3[panel.color_scale]);
+
+    var colorForRectangles = d3.scaleOrdinal(d3['schemeSet3']);
 
     var selectedConstantGroups = 'Bug';
     var selectedGroupIndex = -1;
@@ -606,7 +608,7 @@ export default function link(scope, elem, attrs, ctrl) {
       .attr("y", -squareSide/2)
       .attr("width", squareSide)
       .attr("height", squareSide)
-      .attr("fill", d => d.group ? color(d.group) : color(0) )
+      .attr("fill", d => d.group ? colorForRectangles(d.group) : colorForRectangles(0) )
 
 
 
@@ -725,12 +727,34 @@ export default function link(scope, elem, attrs, ctrl) {
       .attr("y", d => 25 * (columnsSortedTexts.indexOf(d.text)+1) - 5 )
       .attr("width", 10 )
       .attr("height", 10)
-      .attr("fill", d => color( colorTexts.indexOf(d.text))  )
+      .attr("fill", d => colorForRectangles( colorTexts.indexOf(d.text))  )
 
 
 
     function checkHighlight(d) {
       return d.tooltip.toLowerCase().indexOf(highlight_text) !== -1
+    }
+
+    function checkHighlightIssues(d) {
+      return d.tooltip.toLowerCase().indexOf(issues_highlight_text) !== -1
+    }
+
+    if(ctrl.issues_highlight_text){
+      issues_highlight_text = ctrl.issues_highlight_text.toLowerCase()
+
+      simulation.alphaTarget(0);
+
+      circleUpdate
+        .transition()
+        .duration(1000)
+        .delay(2000)
+        .attr("r", d => checkHighlightIssues(d) ? radius*7 : radius)
+        .attr("stroke", d => checkHighlightIssues(d) ? "lightblue" : "")
+        .attr("stroke-width", d => checkHighlightIssues(d) ? 2 : "")
+        .transition()
+        .duration(1000)
+        .delay(1000)
+        .attr("r", radius)
     }
 
     if(ctrl.highlight_text) {
@@ -740,17 +764,17 @@ export default function link(scope, elem, attrs, ctrl) {
       //stop simiulation
       simulation.alphaTarget(0);
 
-      circleUpdate
-        .transition()
-        .duration(1000)
-        .delay(2000)
-        .attr("r", d => checkHighlight(d) ? radius*7 : radius)
-        .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
-        .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
-        .transition()
-        .duration(1000)
-        .delay(1000)
-        .attr("r", radius)
+      // circleUpdate
+      //   .transition()
+      //   .duration(1000)
+      //   .delay(2000)
+      //   .attr("r", d => checkHighlight(d) ? radius*7 : radius)
+      //   .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
+      //   .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
+      //   .transition()
+      //   .duration(1000)
+      //   .delay(1000)
+      //   .attr("r", radius)
 
       rectUpdate
         .transition()

@@ -158,6 +158,16 @@ export class NetworkChartCtrl extends MetricsPanelCtrl {
         this.panel.combine_active = true;
       }
 
+      let highlightIssues = this.templateSrv.replaceWithText('$issue_title', this.panel.scopedVars);
+      if (highlightIssues) {
+        highlightIssues = highlightIssues.trim();
+      }
+      let shouldApplyIssueHighlight = highlightIssues !== "" && highlightIssues !== '-' && highlightIssues !== '$issue_title';
+      if (shouldApplyIssueHighlight) {
+        this.issues_highlight_text = highlightIssues;
+      }
+
+
     }
     this.data = this.detangleSrv.dataFilter(dataList, this.detangleSrv.getCustomConfig(this.templateSrv, this.panel))[0].rows;
     this.render(this.data);

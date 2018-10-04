@@ -14,7 +14,7 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
       });
     }
 
-    var data, panel, svgWrapper, highlight_text;
+    var data, panel, svgWrapper, highlight_text, issues_highlight_text;
     var tooltipEle = elem.find('.tooltip');
     var captionEle = elem.find('.caption');
 
@@ -126,6 +126,8 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
       var height = elem.height();
 
       var color = d3.scaleOrdinal(d3[panel.color_scale]);
+
+      var colorForRectangles = d3.scaleOrdinal(d3['schemeSet3']);
 
       var selectedConstantGroups = 'Bug';
       var selectedGroupIndex = -1;
@@ -512,7 +514,7 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
 
       // ENTER + UPDATE
       rectUpdate = rectUpdate.merge(rectEnter).attr("x", -squareSide / 2).attr("y", -squareSide / 2).attr("width", squareSide).attr("height", squareSide).attr("fill", function (d) {
-        return d.group ? color(d.group) : color(0);
+        return d.group ? colorForRectangles(d.group) : colorForRectangles(0);
       });
 
       var distance = panel.link_distance || 20;
@@ -595,11 +597,29 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
       captionsMerged.selectAll('rect').attr("x", 10).attr("y", function (d) {
         return 25 * (columnsSortedTexts.indexOf(d.text) + 1) - 5;
       }).attr("width", 10).attr("height", 10).attr("fill", function (d) {
-        return color(colorTexts.indexOf(d.text));
+        return colorForRectangles(colorTexts.indexOf(d.text));
       });
 
       function checkHighlight(d) {
         return d.tooltip.toLowerCase().indexOf(highlight_text) !== -1;
+      }
+
+      function checkHighlightIssues(d) {
+        return d.tooltip.toLowerCase().indexOf(issues_highlight_text) !== -1;
+      }
+
+      if (ctrl.issues_highlight_text) {
+        issues_highlight_text = ctrl.issues_highlight_text.toLowerCase();
+
+        simulation.alphaTarget(0);
+
+        circleUpdate.transition().duration(1000).delay(2000).attr("r", function (d) {
+          return checkHighlightIssues(d) ? radius * 7 : radius;
+        }).attr("stroke", function (d) {
+          return checkHighlightIssues(d) ? "lightblue" : "";
+        }).attr("stroke-width", function (d) {
+          return checkHighlightIssues(d) ? 2 : "";
+        }).transition().duration(1000).delay(1000).attr("r", radius);
       }
 
       if (ctrl.highlight_text) {
@@ -609,13 +629,17 @@ System.register(['lodash', 'app/core/app_events'], function (_export, _context) 
         //stop simiulation
         simulation.alphaTarget(0);
 
-        circleUpdate.transition().duration(1000).delay(2000).attr("r", function (d) {
-          return checkHighlight(d) ? radius * 7 : radius;
-        }).attr("stroke", function (d) {
-          return checkHighlight(d) ? "lightblue" : "";
-        }).attr("stroke-width", function (d) {
-          return checkHighlight(d) ? 2 : "";
-        }).transition().duration(1000).delay(1000).attr("r", radius);
+        // circleUpdate
+        //   .transition()
+        //   .duration(1000)
+        //   .delay(2000)
+        //   .attr("r", d => checkHighlight(d) ? radius*7 : radius)
+        //   .attr("stroke", d => checkHighlight(d) ? "lightblue" : "")
+        //   .attr("stroke-width", d => checkHighlight(d) ? 2 : "")
+        //   .transition()
+        //   .duration(1000)
+        //   .delay(1000)
+        //   .attr("r", radius)
 
         rectUpdate.transition().duration(1000).delay(2000).attr("width", function (d) {
           return checkHighlight(d) ? squareSide * 7 : squareSide;
